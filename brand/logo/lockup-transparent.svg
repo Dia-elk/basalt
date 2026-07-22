@@ -1,0 +1,11 @@
+<svg width="620" height="160" viewBox="0 0 620 160" xmlns="http://www.w3.org/2000/svg">
+  
+  <g transform="translate(40,64)">
+    
+    <path d="M16 2L29 9V23L16 30L3 23V9L16 2Z" fill="#FFFFFF" fill-opacity="1" />
+    <path d="M16 2L29 9L16 16L3 9L16 2Z" fill="#29D67A" />
+    <path d="M16 16V30L3 23V9L16 16Z" fill="#FFFFFF" fill-opacity="0.7" />
+  
+  </g>
+  <text x="112" y="80" dominant-baseline="central" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-weight="600" font-size="64" letter-spacing="-1.5" fill="#FFFFFF">Basalt</text>
+</svg>

@@ -1,0 +1,10 @@
+<svg width="256" height="256" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <rect width="64" height="64" fill="#29D67A" />
+  <g transform="translate(16,16)">
+    
+    <path d="M16 2L29 9V23L16 30L3 23V9L16 2Z" fill="#FFFFFF" fill-opacity="1" />
+    <path d="M16 2L29 9L16 16L3 9L16 2Z" fill="#0A0A0B" />
+    <path d="M16 16V30L3 23V9L16 16Z" fill="#FFFFFF" fill-opacity="0.7" />
+  
+  </g>
+</svg>
