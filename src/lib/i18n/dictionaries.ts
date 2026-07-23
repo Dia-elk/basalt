@@ -154,7 +154,6 @@ export interface Dictionary {
     support: string;
   };
   marketing: {
-    welcomeIntro: string[];
     hero: {
       headingLine1: string;
       headingBold: string;
@@ -418,11 +417,10 @@ const dictionaries: Record<Locale, Dictionary> = {
       support: "Support",
     },
     marketing: {
-      welcomeIntro: ["Describe your store.", "Basalt builds it.", "Welcome to Basalt."],
       hero: {
         headingLine1: "Describe your store.",
-        headingBold: "Basalt builds",
-        headingRest: "the rest.",
+        headingBold: "Basalt",
+        headingRest: "builds the rest.",
         subtitle:
           "Basalt turns a business idea into a fully working online store: branded, translated, and live on your own domain. No code. No developers to hire. Just tell it what you're building, and start selling.",
         ctaPrimary: "Start building free",
@@ -893,11 +891,10 @@ const dictionaries: Record<Locale, Dictionary> = {
       support: "الدعم",
     },
     marketing: {
-      welcomeIntro: ["صف متجرك.", "بيسالت يبنيه.", "أهلاً بك في بيسالت."],
       hero: {
         headingLine1: "صف متجرك.",
-        headingBold: "بيسالت يبني",
-        headingRest: "الباقي.",
+        headingBold: "بيسالت",
+        headingRest: "يبني الباقي.",
         subtitle:
           "يحوّل بيسالت فكرة عملك إلى متجر إلكتروني متكامل: بهوية بصرية، بلغتين، ومباشر على نطاقك الخاص. بلا برمجة، وبلا حاجة لتوظيف مطورين. فقط أخبره بما تبنيه، وابدأ البيع.",
         ctaPrimary: "ابدأ البناء مجانًا",

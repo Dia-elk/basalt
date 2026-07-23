@@ -1,0 +1,15 @@
+<svg width="512" height="512" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Black rounded-square app-icon frame (transparent corners).
+       rx=14 gives the gentle rounding typical of app icons. -->
+  <rect width="64" height="64" rx="14" fill="#0A0A0B" />
+  <!-- Basalt cube, brand "black background" variant (green top · white sides),
+       reusing the exact brand-mark geometry, centered via scale+translate. -->
+  <g transform="translate(10.4 10.4) scale(1.35)">
+    <!-- Right face (lit): white -->
+    <path d="M16 2L29 9V23L16 30L3 23V9L16 2Z" fill="#FFFFFF" fill-opacity="1" />
+    <!-- Top face: Basalt green -->
+    <path d="M16 2L29 9L16 16L3 9L16 2Z" fill="#29D67A" />
+    <!-- Left face: white at 70% for 3D shading -->
+    <path d="M16 16V30L3 23V9L16 16Z" fill="#FFFFFF" fill-opacity="0.7" />
+  </g>
+</svg>

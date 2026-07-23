@@ -128,9 +128,22 @@ precision highp float;
 varying vec3 vPosition;
 
 void main(void) {
-  float opacity = (96.0 - length(vPosition)) / 256.0 * 0.6;
-  vec3 color = vec3(0.6);
-  gl_FragColor = vec4(color, opacity);
+  float dist = length(vPosition);
+  // Widened falloff so the field reaches further up the hero before fading
+  // (was: 96.0 / 256.0). Tunable.
+  float opacity = clamp((160.0 - dist) / 280.0, 0.0, 1.0) * 0.5;
+  // Base rock: a muted dark green-gray instead of flat gray, on-brand for
+  // basalt catching a little green light.
+  vec3 rock = vec3(0.16, 0.20, 0.18);
+  // Volcanic haze: distant terrain recedes into a near-black green atmosphere
+  // rather than pure transparent, so the animated noise carries subtle motion
+  // across the whole section instead of leaving dead black above the hills.
+  float haze = clamp(dist / 160.0, 0.0, 1.0);
+  vec3 hazeColor = vec3(0.018, 0.045, 0.030);
+  vec3 color = mix(rock, hazeColor, haze);
+  // Low opacity floor keeps a faint, still-noisy atmosphere in the far field.
+  float floorO = 0.035 * (1.0 - haze * 0.6);
+  gl_FragColor = vec4(color, max(opacity, floorO));
 }
 `;
 
@@ -219,8 +232,10 @@ export function GLSLHills({
     };
 
     renderer.setClearColor(0x000000, 0);
-    camera.position.set(0, 16, cameraZ);
-    camera.lookAt(new THREE.Vector3(0, 28, 0));
+    // Lifted camera + higher lookAt so the terrain band occupies more vertical
+    // real estate instead of sitting low in the hero. Tunable.
+    camera.position.set(0, 30, cameraZ);
+    camera.lookAt(new THREE.Vector3(0, 52, 0));
     scene.add(plane.mesh);
     resize();
     frameId = requestAnimationFrame(loop);

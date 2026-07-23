@@ -8,6 +8,7 @@ import { Container } from "@/components/shared/container";
 import { Button } from "@/components/ui/button";
 import { GLSLHills } from "@/components/ui/glsl-hills";
 import { CountUp } from "@/components/shared/count-up";
+import { GlitchText } from "@/components/shared/glitch-text";
 import { useLocale } from "@/lib/i18n/locale-provider";
 
 const products = [
@@ -61,7 +62,7 @@ export function HeroSection() {
         >
           {t.headingLine1}
           <br />
-          <span className="font-semibold">{t.headingBold}</span> {t.headingRest}
+          <GlitchText className="font-bold text-success" text={t.headingBold} /> {t.headingRest}
         </motion.h1>
 
         <motion.p
