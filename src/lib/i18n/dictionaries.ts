@@ -62,9 +62,9 @@ export interface Dictionary {
   storeSidebar: {
     allStores: string;
     overview: string;
+    aiWorkspace: string;
     deployments: string;
     domains: string;
-    aiWorkspace: string;
     team: string;
     settings: string;
   };
