@@ -62,7 +62,18 @@ export interface BlockContent {
   body?: string;
   ctaLabel?: string;
   imageUrl?: string;
+  backgroundColor?: string;
   items?: { title: string; description?: string }[];
+}
+
+export type BuilderFieldType = "text" | "textarea" | "color" | "image" | "list";
+
+export interface BuilderField {
+  key: keyof BlockContent;
+  label: string;
+  type: BuilderFieldType;
+  placeholder?: string;
+  maxLength?: number;
 }
 
 export interface Block {
@@ -122,6 +133,45 @@ export const BLOCK_FEATURE_MAP: Partial<Record<BlockType, string>> = {
   "referral-banner": "referral",
 };
 
+/**
+ * What's editable per block type. Blocks whose list content is pulled live
+ * from another feature (testimonials from Reviews, faq from FAQ, product-grid
+ * from the catalog, blog-feed from Blog, bundle-showcase from Bundles) only
+ * expose heading + color — the items themselves aren't hand-authored here.
+ */
+const COLOR_FIELD: BuilderField = { key: "backgroundColor", label: "Background color", type: "color" };
+const HEADING_FIELD: BuilderField = { key: "heading", label: "Heading", type: "text", maxLength: 60 };
+
+export const BLOCK_FIELDS: Record<BlockType, BuilderField[]> = {
+  hero: [
+    HEADING_FIELD,
+    { key: "subheading", label: "Subheading", type: "textarea", maxLength: 140 },
+    { key: "ctaLabel", label: "Button label", type: "text", maxLength: 24 },
+    { key: "imageUrl", label: "Background image URL", type: "image" },
+    COLOR_FIELD,
+  ],
+  "product-grid": [HEADING_FIELD, COLOR_FIELD],
+  "featured-collection": [HEADING_FIELD, COLOR_FIELD],
+  "feature-cards": [HEADING_FIELD, { key: "items", label: "Value props", type: "list" }, COLOR_FIELD],
+  testimonials: [HEADING_FIELD, COLOR_FIELD],
+  "cta-banner": [HEADING_FIELD, { key: "ctaLabel", label: "Button label", type: "text", maxLength: 24 }, COLOR_FIELD],
+  faq: [HEADING_FIELD, COLOR_FIELD],
+  newsletter: [HEADING_FIELD, { key: "body", label: "Description", type: "textarea", maxLength: 140 }, COLOR_FIELD],
+  "image-split": [
+    HEADING_FIELD,
+    { key: "body", label: "Body text", type: "textarea", maxLength: 280 },
+    { key: "imageUrl", label: "Image URL", type: "image" },
+    COLOR_FIELD,
+  ],
+  "marquee-logos": [COLOR_FIELD],
+  "coupon-banner": [HEADING_FIELD, { key: "body", label: "Details", type: "textarea", maxLength: 140 }, COLOR_FIELD],
+  "loyalty-widget": [HEADING_FIELD, COLOR_FIELD],
+  "gift-card-promo": [HEADING_FIELD, { key: "ctaLabel", label: "Button label", type: "text", maxLength: 24 }, COLOR_FIELD],
+  "bundle-showcase": [HEADING_FIELD, COLOR_FIELD],
+  "blog-feed": [HEADING_FIELD, COLOR_FIELD],
+  "referral-banner": [HEADING_FIELD, { key: "body", label: "Details", type: "textarea", maxLength: 140 }, COLOR_FIELD],
+};
+
 const DEFAULT_CONTENT: Record<BlockType, BlockContent> = {
   hero: { heading: "Welcome to the store", subheading: "Quality pieces, thoughtfully chosen.", ctaLabel: "Shop now" },
   "product-grid": { heading: "Best sellers" },
@@ -147,6 +197,11 @@ let blockCounter = 0;
 function makeBlock(type: BlockType): Block {
   blockCounter += 1;
   return { id: `blk-${blockCounter}-${type}`, type, content: { ...DEFAULT_CONTENT[type] } };
+}
+
+/** A stable, unpersisted block used only to render a live thumbnail in the component library. */
+export function previewBlock(type: BlockType): Block {
+  return { id: `preview-${type}`, type, content: DEFAULT_CONTENT[type] };
 }
 
 export function createBlock(type: BlockType): Block {

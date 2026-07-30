@@ -2,12 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { toast } from "sonner";
+import { LayoutDashboard } from "lucide-react";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
-import { StoreScopedPage } from "@/components/dashboard/store-scoped-page";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { SortableBlock } from "@/components/builder/sortable-block";
 import { ComponentLibrary } from "@/components/builder/component-library";
+import { EditBlockPanel } from "@/components/builder/edit-block-panel";
 import {
   STOREFRONT_PAGES,
   BLOCK_LIBRARY,
@@ -16,19 +20,40 @@ import {
   createBlock,
   type StoreComposition,
   type BlockType,
+  type BlockContent,
 } from "@/lib/mock/builder";
+import { useStore } from "@/hooks/use-store";
 import type { Store } from "@/lib/mock/stores";
 import { cn } from "@/lib/utils";
 
 export default function StoreBuilderPage() {
   const { slug } = useParams<{ slug: string }>();
+  const { store, loading } = useStore(slug);
 
-  return <StoreScopedPage slug={slug}>{(store) => <BuilderCanvas store={store} />}</StoreScopedPage>;
+  if (loading) {
+    return (
+      <div className="p-5">
+        <Skeleton className="h-8 w-64" />
+      </div>
+    );
+  }
+
+  if (!store) {
+    return (
+      <div className="flex flex-col items-center gap-4 p-16 text-center">
+        <p className="text-lg font-medium">Store not found</p>
+        <Button render={<Link href="/dashboard" />}>Back to Stores</Button>
+      </div>
+    );
+  }
+
+  return <BuilderWorkspace store={store} />;
 }
 
-function BuilderCanvas({ store }: { store: Store }) {
+function BuilderWorkspace({ store }: { store: Store }) {
   const [composition, setComposition] = useState<StoreComposition | null>(null);
   const [pageId, setPageId] = useState("home");
+  const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   useEffect(() => {
@@ -36,14 +61,24 @@ function BuilderCanvas({ store }: { store: Store }) {
   }, [store]);
 
   if (!composition) {
-    return <div className="h-40 animate-pulse rounded-2xl bg-muted" />;
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Skeleton className="h-8 w-64" />
+      </div>
+    );
   }
 
   const blocks = composition[pageId] ?? [];
+  const selectedBlock = blocks.find((b) => b.id === selectedBlockId) ?? null;
 
   const persist = (next: StoreComposition) => {
     setComposition(next);
     saveStoreComposition(store.slug, next);
+  };
+
+  const switchPage = (id: string) => {
+    setPageId(id);
+    setSelectedBlockId(null);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -56,59 +91,94 @@ function BuilderCanvas({ store }: { store: Store }) {
   };
 
   const handleAdd = (type: BlockType) => {
-    persist({ ...composition, [pageId]: [...blocks, createBlock(type)] });
+    const block = createBlock(type);
+    persist({ ...composition, [pageId]: [...blocks, block] });
+    setSelectedBlockId(block.id);
     const name = BLOCK_LIBRARY.find((b) => b.type === type)?.name ?? type;
-    toast.success(`${name} added`, { description: "Drag it to reorder, or add another." });
+    toast.success(`${name} added`, { description: "Edit it on the right, or drag to reorder." });
   };
 
   const handleRemove = (id: string) => {
     persist({ ...composition, [pageId]: blocks.filter((b) => b.id !== id) });
+    if (selectedBlockId === id) setSelectedBlockId(null);
+  };
+
+  const handleContentChange = (id: string, content: BlockContent) => {
+    persist({ ...composition, [pageId]: blocks.map((b) => (b.id === id ? { ...b, content } : b)) });
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-lg font-medium">Builder</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Drag to reorder, or add a component from the library. Changes save automatically.
-        </p>
-      </div>
-
-      <div className="flex flex-wrap gap-1.5">
-        {STOREFRONT_PAGES.map((page) => (
-          <button
-            key={page.id}
-            type="button"
-            onClick={() => setPageId(page.id)}
-            className={cn(
-              "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
-              pageId === page.id
-                ? "border-foreground/30 bg-secondary text-foreground"
-                : "border-border text-muted-foreground hover:text-foreground"
-            )}
+    <div className="flex h-full flex-col">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1.5 text-muted-foreground hover:text-foreground"
+            render={<Link href={`/dashboard/stores/${store.slug}`} />}
           >
-            {page.name}
-          </button>
-        ))}
+            <LayoutDashboard className="size-3.5" strokeWidth={1.5} />
+            <span className="hidden sm:inline">Overview</span>
+          </Button>
+          <div className="hidden h-4 w-px bg-border sm:block" />
+          <div className="flex flex-wrap items-center gap-1.5">
+            {STOREFRONT_PAGES.map((page) => (
+              <button
+                key={page.id}
+                type="button"
+                onClick={() => switchPage(page.id)}
+                className={cn(
+                  "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                  pageId === page.id
+                    ? "border-foreground/30 bg-secondary text-foreground"
+                    : "border-border text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {page.name}
+              </button>
+            ))}
+          </div>
+        </div>
+        <p className="hidden text-xs text-muted-foreground sm:block">Changes save automatically</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_320px] lg:items-start">
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
-            <div className="flex flex-col gap-3">
-              {blocks.length > 0 ? (
-                blocks.map((block) => <SortableBlock key={block.id} block={block} store={store} onRemove={handleRemove} />)
-              ) : (
-                <div className="rounded-2xl border border-dashed border-border p-14 text-center text-sm text-muted-foreground">
-                  This page is empty. Add a component from the library.
-                </div>
-              )}
-            </div>
-          </SortableContext>
-        </DndContext>
+      <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[1fr_320px]">
+        <div className="overflow-y-auto">
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
+              <div className="flex flex-col">
+                {blocks.length > 0 ? (
+                  blocks.map((block) => (
+                    <SortableBlock
+                      key={block.id}
+                      block={block}
+                      store={store}
+                      selected={block.id === selectedBlockId}
+                      onSelect={setSelectedBlockId}
+                      onRemove={handleRemove}
+                    />
+                  ))
+                ) : (
+                  <div className="flex min-h-[400px] items-center justify-center p-14 text-center text-sm text-muted-foreground">
+                    This page is empty. Add a component from the library.
+                  </div>
+                )}
+              </div>
+            </SortableContext>
+          </DndContext>
+        </div>
 
-        <div className="lg:sticky lg:top-6 lg:h-[calc(100vh-160px)]">
-          <ComponentLibrary onAdd={handleAdd} />
+        <div className="hidden border-s border-border p-3 lg:block">
+          {selectedBlock ? (
+            <EditBlockPanel
+              block={selectedBlock}
+              onChange={(content) => handleContentChange(selectedBlock.id, content)}
+              onRemove={() => handleRemove(selectedBlock.id)}
+              onClose={() => setSelectedBlockId(null)}
+            />
+          ) : (
+            <ComponentLibrary store={store} onAdd={handleAdd} />
+          )}
         </div>
       </div>
     </div>

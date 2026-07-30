@@ -1,11 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
-import { BLOCK_LIBRARY, BLOCK_CATEGORIES, type BlockType, type BlockCategory } from "@/lib/mock/builder";
+import { BlockRenderer } from "@/components/builder/block-renderers";
+import { BLOCK_LIBRARY, BLOCK_CATEGORIES, previewBlock, type BlockType, type BlockCategory } from "@/lib/mock/builder";
+import type { Store } from "@/lib/mock/stores";
 import { cn } from "@/lib/utils";
 
-export function ComponentLibrary({ onAdd }: { onAdd: (type: BlockType) => void }) {
+const THUMBNAIL_SCALE = 0.32;
+
+function BlockThumbnail({ type, store }: { type: BlockType; store: Store }) {
+  return (
+    <div className="pointer-events-none relative h-24 w-full overflow-hidden rounded-lg border border-border bg-background">
+      <div
+        className="absolute top-0 left-0 origin-top-left"
+        style={{ width: `${100 / THUMBNAIL_SCALE}%`, transform: `scale(${THUMBNAIL_SCALE})` }}
+      >
+        <BlockRenderer block={previewBlock(type)} store={store} />
+      </div>
+    </div>
+  );
+}
+
+export function ComponentLibrary({ store, onAdd }: { store: Store; onAdd: (type: BlockType) => void }) {
   const [activeCategory, setActiveCategory] = useState<BlockCategory>("Layout");
   const items = BLOCK_LIBRARY.filter((b) => b.category === activeCategory);
 
@@ -34,25 +50,24 @@ export function ComponentLibrary({ onAdd }: { onAdd: (type: BlockType) => void }
         ))}
       </div>
 
-      <div className="flex flex-1 flex-col gap-2 overflow-y-auto p-3">
+      <div className="flex flex-1 flex-col gap-3 overflow-y-auto p-3">
         {items.map((item) => (
           <button
             key={item.type}
             type="button"
             onClick={() => onAdd(item.type)}
-            className="group flex items-start gap-3 rounded-xl border border-border bg-background p-3 text-start transition-colors hover:border-success/30 hover:bg-success-muted/30"
+            className="group flex flex-col overflow-hidden rounded-xl border border-border bg-background text-start transition-colors hover:border-success/30"
           >
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-border bg-muted text-muted-foreground group-hover:text-success">
-              <item.icon className="size-4" strokeWidth={1.5} />
+            <BlockThumbnail type={item.type} store={store} />
+            <div className="flex items-start gap-2.5 p-3">
+              <div className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-border bg-muted text-muted-foreground group-hover:text-success">
+                <item.icon className="size-3.5" strokeWidth={1.5} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium">{item.name}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">{item.description}</p>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium">{item.name}</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">{item.description}</p>
-            </div>
-            <Plus
-              className="mt-1 size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
-              strokeWidth={1.5}
-            />
           </button>
         ))}
       </div>

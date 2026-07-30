@@ -5,19 +5,26 @@ import { BLOCK_LIBRARY, type Block } from "@/lib/mock/builder";
 import type { Store } from "@/lib/mock/stores";
 
 function HeroBlock({ block, store }: { block: Block; store: Store }) {
+  const { heading, subheading, ctaLabel, imageUrl, backgroundColor } = block.content;
   return (
     <div
-      className="flex flex-col items-center gap-3 rounded-xl px-6 py-14 text-center"
-      style={{ background: `linear-gradient(180deg, ${store.accent}1F, transparent)` }}
+      className="flex flex-col items-center gap-3 bg-cover bg-center px-6 py-20 text-center"
+      style={{
+        backgroundImage: imageUrl
+          ? `linear-gradient(0deg, rgba(0,0,0,.45), rgba(0,0,0,.45)), url(${imageUrl})`
+          : !backgroundColor
+            ? `linear-gradient(180deg, ${store.accent}1F, transparent)`
+            : undefined,
+      }}
     >
-      <h2 className="max-w-md text-2xl font-semibold text-balance">{block.content.heading}</h2>
-      {block.content.subheading && <p className="max-w-sm text-sm text-muted-foreground">{block.content.subheading}</p>}
-      {block.content.ctaLabel && (
+      <h2 className="max-w-lg text-3xl font-semibold text-balance">{heading}</h2>
+      {subheading && <p className="max-w-sm text-sm text-muted-foreground">{subheading}</p>}
+      {ctaLabel && (
         <span
-          className="mt-2 rounded-lg px-4 py-2 text-sm font-medium"
+          className="mt-2 rounded-lg px-5 py-2.5 text-sm font-medium"
           style={{ backgroundColor: store.accent, color: "#0A0A0B" }}
         >
-          {block.content.ctaLabel}
+          {ctaLabel}
         </span>
       )}
     </div>
@@ -27,13 +34,13 @@ function HeroBlock({ block, store }: { block: Block; store: Store }) {
 function ProductGridBlock({ block, store }: { block: Block; store: Store }) {
   const products = generateTopProducts(store.id, store.businessType).slice(0, 4);
   return (
-    <div className="px-6 py-8">
-      {block.content.heading && <h3 className="mb-4 text-sm font-medium">{block.content.heading}</h3>}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <div className="px-6 py-14 sm:px-10">
+      {block.content.heading && <h3 className="mb-6 text-center text-lg font-medium">{block.content.heading}</h3>}
+      <div className="mx-auto grid max-w-5xl grid-cols-2 gap-4 sm:grid-cols-4">
         {products.map((p) => (
-          <div key={p.name} className="flex flex-col gap-2 rounded-lg border border-border bg-card p-2.5">
-            <div className="aspect-square rounded-md bg-gradient-to-br from-muted to-secondary" />
-            <p className="truncate text-xs">{p.name}</p>
+          <div key={p.name} className="flex flex-col gap-2.5">
+            <div className="aspect-square rounded-lg bg-gradient-to-br from-muted to-secondary" />
+            <p className="truncate text-sm">{p.name}</p>
             <p className="text-xs text-muted-foreground" dir="ltr">
               ${Math.round(p.revenue / p.units / 5) * 5}
             </p>
@@ -47,13 +54,13 @@ function ProductGridBlock({ block, store }: { block: Block; store: Store }) {
 function TestimonialsBlock({ block, store }: { block: Block; store: Store }) {
   const reviews = generateReviews(store).slice(0, 2);
   return (
-    <div className="px-6 py-8">
-      {block.content.heading && <h3 className="mb-4 text-center text-sm font-medium">{block.content.heading}</h3>}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <div className="px-6 py-14 sm:px-10">
+      {block.content.heading && <h3 className="mb-6 text-center text-lg font-medium">{block.content.heading}</h3>}
+      <div className="mx-auto grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2">
         {reviews.map((r) => (
-          <div key={r.id} className="rounded-lg border border-border bg-card p-3.5">
-            <p className="text-xs text-muted-foreground">&ldquo;{r.quote}&rdquo;</p>
-            <p className="mt-2 text-xs font-medium">{r.author}</p>
+          <div key={r.id} className="rounded-xl border border-border bg-card p-4">
+            <p className="text-sm text-muted-foreground">&ldquo;{r.quote}&rdquo;</p>
+            <p className="mt-2.5 text-sm font-medium">{r.author}</p>
           </div>
         ))}
       </div>
@@ -64,12 +71,12 @@ function TestimonialsBlock({ block, store }: { block: Block; store: Store }) {
 function FaqBlock({ block, store }: { block: Block; store: Store }) {
   const entries = generateFaqEntries(store).slice(0, 3);
   return (
-    <div className="px-6 py-8">
-      {block.content.heading && <h3 className="mb-4 text-sm font-medium">{block.content.heading}</h3>}
-      <div className="flex flex-col divide-y divide-border rounded-lg border border-border">
+    <div className="px-6 py-14 sm:px-10">
+      {block.content.heading && <h3 className="mb-6 text-center text-lg font-medium">{block.content.heading}</h3>}
+      <div className="mx-auto flex max-w-2xl flex-col divide-y divide-border rounded-xl border border-border">
         {entries.map((e) => (
-          <div key={e.question} className="p-3">
-            <p className="text-xs font-medium">{e.question}</p>
+          <div key={e.question} className="p-4">
+            <p className="text-sm font-medium">{e.question}</p>
           </div>
         ))}
       </div>
@@ -78,13 +85,14 @@ function FaqBlock({ block, store }: { block: Block; store: Store }) {
 }
 
 function NewsletterBlock({ block, store }: { block: Block; store: Store }) {
+  const { heading, body, backgroundColor } = block.content;
   return (
     <div
-      className="flex flex-col items-center gap-3 rounded-xl px-6 py-10 text-center"
-      style={{ backgroundColor: `${store.accent}14` }}
+      className="flex flex-col items-center gap-3 px-6 py-16 text-center"
+      style={{ backgroundColor: backgroundColor ? undefined : `${store.accent}14` }}
     >
-      <h3 className="text-lg font-medium">{block.content.heading}</h3>
-      {block.content.body && <p className="max-w-sm text-xs text-muted-foreground">{block.content.body}</p>}
+      <h3 className="text-xl font-medium">{heading}</h3>
+      {body && <p className="max-w-sm text-sm text-muted-foreground">{body}</p>}
       <div className="mt-1 flex w-full max-w-xs items-center gap-2 rounded-lg border border-border bg-background px-3 py-2">
         <span className="flex-1 text-start text-xs text-muted-foreground">you@email.com</span>
         <span
@@ -99,18 +107,19 @@ function NewsletterBlock({ block, store }: { block: Block; store: Store }) {
 }
 
 function CtaBannerBlock({ block, store }: { block: Block; store: Store }) {
+  const { heading, ctaLabel, backgroundColor } = block.content;
   return (
     <div
-      className="flex flex-col items-center gap-3 rounded-xl px-6 py-10 text-center"
-      style={{ backgroundColor: `${store.accent}14` }}
+      className="flex flex-col items-center gap-3 px-6 py-16 text-center"
+      style={{ backgroundColor: backgroundColor ? undefined : `${store.accent}14` }}
     >
-      <h3 className="text-lg font-medium">{block.content.heading}</h3>
-      {block.content.ctaLabel && (
+      <h3 className="text-xl font-medium">{heading}</h3>
+      {ctaLabel && (
         <span
-          className="rounded-lg px-4 py-2 text-sm font-medium"
+          className="rounded-lg px-5 py-2.5 text-sm font-medium"
           style={{ backgroundColor: store.accent, color: "#0A0A0B" }}
         >
-          {block.content.ctaLabel}
+          {ctaLabel}
         </span>
       )}
     </div>
@@ -121,7 +130,7 @@ function GenericBlock({ block }: { block: Block }) {
   const meta = BLOCK_LIBRARY.find((b) => b.type === block.type);
   const Icon = meta?.icon ?? LayoutTemplate;
   return (
-    <div className="flex flex-col items-center gap-2 px-6 py-10 text-center">
+    <div className="flex flex-col items-center gap-2 px-6 py-16 text-center">
       <div className="flex size-9 items-center justify-center rounded-full border border-border bg-muted text-muted-foreground">
         <Icon className="size-4" strokeWidth={1.5} />
       </div>
