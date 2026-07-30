@@ -62,11 +62,26 @@ export interface Dictionary {
   storeSidebar: {
     allStores: string;
     overview: string;
+    orders: string;
     aiWorkspace: string;
+    builder: string;
     deployments: string;
     domains: string;
     team: string;
     settings: string;
+    wishlist: string;
+    reviews: string;
+    coupons: string;
+    inventory: string;
+    referral: string;
+    loyalty: string;
+    giftCards: string;
+    bundles: string;
+    analytics: string;
+    seo: string;
+    newsletter: string;
+    blog: string;
+    faq: string;
   };
   topbar: {
     switchStore: string;
@@ -325,11 +340,26 @@ const dictionaries: Record<Locale, Dictionary> = {
     storeSidebar: {
       allStores: "All stores",
       overview: "Overview",
+      orders: "Orders",
       deployments: "Deployments",
       domains: "Domains",
       aiWorkspace: "AI Workspace",
+      builder: "Builder",
       team: "Team",
       settings: "Settings",
+      wishlist: "Wishlist",
+      reviews: "Reviews",
+      coupons: "Coupons",
+      inventory: "Inventory",
+      referral: "Referral",
+      loyalty: "Loyalty",
+      giftCards: "Gift Cards",
+      bundles: "Bundles",
+      analytics: "Analytics",
+      seo: "SEO",
+      newsletter: "Newsletter",
+      blog: "Blog",
+      faq: "FAQ",
     },
     topbar: {
       switchStore: "Switch store",
@@ -798,11 +828,26 @@ const dictionaries: Record<Locale, Dictionary> = {
     storeSidebar: {
       allStores: "كل المتاجر",
       overview: "نظرة عامة",
+      orders: "الطلبات",
       deployments: "عمليات النشر",
       domains: "النطاقات",
       aiWorkspace: "مساحة الذكاء الاصطناعي",
+      builder: "المُنشئ",
       team: "الفريق",
       settings: "الإعدادات",
+      wishlist: "المفضلة",
+      reviews: "التقييمات",
+      coupons: "الكوبونات",
+      inventory: "المخزون",
+      referral: "الإحالة",
+      loyalty: "الولاء",
+      giftCards: "بطاقات الهدايا",
+      bundles: "الحزم",
+      analytics: "التحليلات",
+      seo: "السيو",
+      newsletter: "النشرة البريدية",
+      blog: "المدونة",
+      faq: "الأسئلة الشائعة",
     },
     topbar: {
       switchStore: "تبديل المتجر",

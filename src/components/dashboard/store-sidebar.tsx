@@ -2,24 +2,57 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowLeft, LayoutGrid, Rocket, Globe2, Bot, Users, Settings } from "lucide-react";
+import { ArrowLeft, LayoutGrid, Rocket, Globe2, Bot, Users, Settings, ShoppingCart, Blocks } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StoreLogo } from "@/components/shared/store-logo";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { useStore } from "@/hooks/use-store";
 import { useLocale } from "@/lib/i18n/locale-provider";
+import { featureOptions } from "@/lib/mock/wizard-options";
+import { getStoreComposition, featuresFromComposition } from "@/lib/mock/builder";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 
-function storeNavItems(slug: string) {
+type StoreSidebarKey = keyof Dictionary["storeSidebar"];
+
+// featureOptions values are kebab-case (e.g. "gift-cards"); dictionary keys are camelCase.
+const featureDictKeys: Record<string, StoreSidebarKey> = {
+  wishlist: "wishlist",
+  reviews: "reviews",
+  coupons: "coupons",
+  inventory: "inventory",
+  referral: "referral",
+  loyalty: "loyalty",
+  "gift-cards": "giftCards",
+  bundles: "bundles",
+  analytics: "analytics",
+  seo: "seo",
+  newsletter: "newsletter",
+  blog: "blog",
+  faq: "faq",
+};
+
+/**
+ * Core items every store has, plus one entry per optional feature the store
+ * actually enabled (via the wizard's feature step) — see product_vision_two_workspaces memory.
+ */
+function storeNavItems(slug: string, features: string[]) {
   const base = `/dashboard/stores/${slug}`;
-  return [
-    { href: base, key: "overview" as const, icon: LayoutGrid, exact: true },
-    { href: `${base}/deployments`, key: "deployments" as const, icon: Rocket },
-    { href: `${base}/domains`, key: "domains" as const, icon: Globe2 },
-    { href: `${base}/ai-workspace`, key: "aiWorkspace" as const, icon: Bot },
-    { href: `${base}/team`, key: "team" as const, icon: Users },
-    { href: `${base}/settings`, key: "settings" as const, icon: Settings },
+  const core = [
+    { href: base, key: "overview" as StoreSidebarKey, icon: LayoutGrid, exact: true },
+    { href: `${base}/orders`, key: "orders" as StoreSidebarKey, icon: ShoppingCart },
   ];
+  const enabledFeatures = featureOptions
+    .filter((f) => features.includes(f.value))
+    .map((f) => ({ href: `${base}/${f.value}`, key: featureDictKeys[f.value], icon: f.icon }));
+  const platform = [
+    { href: `${base}/deployments`, key: "deployments" as StoreSidebarKey, icon: Rocket },
+    { href: `${base}/domains`, key: "domains" as StoreSidebarKey, icon: Globe2 },
+    { href: `${base}/ai-workspace`, key: "aiWorkspace" as StoreSidebarKey, icon: Bot },
+    { href: `${base}/builder`, key: "builder" as StoreSidebarKey, icon: Blocks },
+    { href: `${base}/team`, key: "team" as StoreSidebarKey, icon: Users },
+    { href: `${base}/settings`, key: "settings" as StoreSidebarKey, icon: Settings },
+  ];
+  return [...core, ...enabledFeatures, ...platform];
 }
 
 function StoreNavLink({
@@ -60,6 +93,13 @@ export function StoreSidebarContent({ slug, onNavigate }: { slug: string; onNavi
   const { dict } = useLocale();
   const t: Dictionary["storeSidebar"] = dict.storeSidebar;
 
+  // A feature shows up either because it was picked in the wizard, or because
+  // a block that implies it (e.g. "faq", "loyalty-widget") is actually on the
+  // store's page — see product_vision_two_workspaces memory.
+  const effectiveFeatures = store
+    ? Array.from(new Set([...store.features, ...featuresFromComposition(getStoreComposition(store))]))
+    : [];
+
   return (
     <>
       <div className="flex flex-col gap-3 px-5 py-4">
@@ -83,8 +123,8 @@ export function StoreSidebarContent({ slug, onNavigate }: { slug: string; onNavi
         {store && <StatusBadge status={store.status} className="w-fit" />}
       </div>
 
-      <nav className="flex flex-1 flex-col gap-1 px-3 py-2">
-        {storeNavItems(slug).map(({ key, ...item }) => (
+      <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 py-2">
+        {storeNavItems(slug, effectiveFeatures).map(({ key, ...item }) => (
           <StoreNavLink key={item.href} {...item} label={t[key]} onNavigate={onNavigate} />
         ))}
       </nav>

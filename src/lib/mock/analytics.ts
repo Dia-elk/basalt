@@ -1,4 +1,4 @@
-function hashSeed(input: string): number {
+export function hashSeed(input: string): number {
   let h = 1779033703 ^ input.length;
   for (let i = 0; i < input.length; i++) {
     h = Math.imul(h ^ input.charCodeAt(i), 3432918353);
@@ -7,7 +7,7 @@ function hashSeed(input: string): number {
   return h >>> 0;
 }
 
-function mulberry32(seed: number) {
+export function mulberry32(seed: number) {
   let a = seed;
   return function () {
     a |= 0;

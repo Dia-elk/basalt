@@ -43,6 +43,8 @@ export interface Store {
   revenueChange: number;
   visitors: number;
   createdAt: string;
+  /** Optional feature values from wizard-options' featureOptions, e.g. "wishlist", "reviews". Drives the dynamic sidebar. */
+  features: string[];
 }
 
 export const stores: Store[] = [
@@ -62,6 +64,7 @@ export const stores: Store[] = [
     revenueChange: 12.4,
     visitors: 18420,
     createdAt: "2026-02-11",
+    features: ["wishlist", "reviews", "coupons", "loyalty", "gift-cards", "seo", "newsletter"],
   },
   {
     id: "northfield-furniture",
@@ -79,6 +82,7 @@ export const stores: Store[] = [
     revenueChange: 6.1,
     visitors: 24310,
     createdAt: "2025-11-03",
+    features: ["wishlist", "reviews", "inventory", "seo", "faq", "newsletter"],
   },
   {
     id: "cove-cosmetics",
@@ -96,6 +100,7 @@ export const stores: Store[] = [
     revenueChange: 21.8,
     visitors: 15980,
     createdAt: "2026-04-22",
+    features: ["wishlist", "reviews", "coupons", "referral", "bundles", "newsletter", "blog"],
   },
   {
     id: "circuit-sons",
@@ -113,6 +118,7 @@ export const stores: Store[] = [
     revenueChange: -3.2,
     visitors: 41200,
     createdAt: "2025-08-19",
+    features: ["wishlist", "reviews", "coupons", "inventory", "analytics", "seo", "faq", "gift-cards"],
   },
   {
     id: "whitfield-menswear",
@@ -130,6 +136,7 @@ export const stores: Store[] = [
     revenueChange: 9.7,
     visitors: 20110,
     createdAt: "2025-12-30",
+    features: ["wishlist", "reviews", "coupons", "loyalty", "seo"],
   },
   {
     id: "reading-room",
@@ -147,6 +154,7 @@ export const stores: Store[] = [
     revenueChange: 2.1,
     visitors: 6340,
     createdAt: "2026-06-02",
+    features: ["wishlist", "reviews", "blog", "faq"],
   },
   {
     id: "sable-and-stone",
@@ -164,6 +172,7 @@ export const stores: Store[] = [
     revenueChange: 0,
     visitors: 0,
     createdAt: "2026-07-18",
+    features: ["seo", "faq"],
   },
 ];
 
