@@ -2,6 +2,20 @@ import type { BusinessType, Store } from "@/lib/mock/stores";
 
 export type ProductStatus = "active" | "draft" | "out-of-stock";
 
+export interface ProductVariantOption {
+  name: string;
+  values: string[];
+}
+
+export interface ProductVariant {
+  id: string;
+  optionValues: Record<string, string>;
+  /** Overrides the base product price for this combination; falls back to it when unset. */
+  price?: number;
+  stock: number;
+  sku?: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -14,6 +28,35 @@ export interface Product {
   images?: string[];
   /** Other product ids from the same store, shown as cross-sells on this product's page. */
   relatedProductIds?: string[];
+  options?: ProductVariantOption[];
+  variants?: ProductVariant[];
+}
+
+function variantKey(optionValues: Record<string, string>): string {
+  return Object.entries(optionValues)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([k, v]) => `${k}:${v}`)
+    .join("|");
+}
+
+/** Rebuilds the full cartesian product of variant combinations from a product's options, keeping stock/price/sku for any combo that still exists. */
+export function generateVariants(options: ProductVariantOption[], existing: ProductVariant[] = []): ProductVariant[] {
+  if (options.length === 0) return [];
+  const existingByKey = new Map(existing.map((v) => [variantKey(v.optionValues), v]));
+
+  let combos: Record<string, string>[] = [{}];
+  options.forEach((opt) => {
+    const next: Record<string, string>[] = [];
+    combos.forEach((combo) => {
+      opt.values.forEach((val) => next.push({ ...combo, [opt.name]: val }));
+    });
+    combos = next;
+  });
+
+  return combos.map((optionValues) => {
+    const found = existingByKey.get(variantKey(optionValues));
+    return found ?? { id: `var-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, optionValues, stock: 0 };
+  });
 }
 
 // A few generic sample products per business type, so the grid looks populated.
@@ -39,18 +82,18 @@ function hashSeed(input: string): number {
 
 export const ACCENTS = ["#D4AF6A", "#8B6A4F", "#5B8DEF", "#C4622D", "#6B7CE8", "#29D67A"];
 
-export function generateProducts(storeId: string, businessType: BusinessType): Product[] {
-  const names = SAMPLES[businessType] ?? FALLBACK;
-  const seed = hashSeed(storeId);
+export function generateProducts(store: Store): Product[] {
+  const names = SAMPLES[store.businessType] ?? FALLBACK;
+  const seed = hashSeed(store.id);
   return names.map((name, i) => {
     const s = (seed + i * 7919) % 9973;
     const stock = (s >> 1) % 80;
     const status: ProductStatus = stock === 0 ? "out-of-stock" : i === names.length - 1 ? "draft" : "active";
     return {
-      id: `prod-${storeId}-${i}`,
+      id: `prod-${store.id}-${i}`,
       name,
       price: 45 + ((s % 18) * 10),
-      currency: "USD",
+      currency: store.currencies[0] ?? "USD",
       stock,
       status,
       accent: ACCENTS[i % ACCENTS.length],
@@ -58,15 +101,15 @@ export function generateProducts(storeId: string, businessType: BusinessType): P
   });
 }
 
-export function createProduct(partial: Omit<Product, "id" | "currency">): Product {
-  return { id: `prod-${Date.now()}`, currency: "USD", ...partial };
+export function createProduct(partial: Omit<Product, "id">): Product {
+  return { id: `prod-${Date.now()}`, ...partial };
 }
 
 const PRODUCTS_PREFIX = "basalt_products_";
 
 /** Reads a store's saved product catalog, seeding (and persisting) one on first access. */
 export function getStoreProducts(store: Store): Product[] {
-  if (typeof window === "undefined") return generateProducts(store.id, store.businessType);
+  if (typeof window === "undefined") return generateProducts(store);
 
   const raw = window.sessionStorage.getItem(`${PRODUCTS_PREFIX}${store.slug}`);
   if (raw) {
@@ -77,7 +120,7 @@ export function getStoreProducts(store: Store): Product[] {
     }
   }
 
-  const seeded = generateProducts(store.id, store.businessType);
+  const seeded = generateProducts(store);
   window.sessionStorage.setItem(`${PRODUCTS_PREFIX}${store.slug}`, JSON.stringify(seeded));
   return seeded;
 }

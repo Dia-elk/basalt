@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EmptyState } from "@/components/shared/empty-state";
 import { getStoreProducts, saveStoreProducts, type Product, type ProductStatus } from "@/lib/mock/products";
+import { currencySymbol } from "@/lib/currency";
 import type { Store } from "@/lib/mock/stores";
 
 export default function StoreProductsPage() {
@@ -69,7 +70,11 @@ function ProductsWorkspace({ store }: { store: Store }) {
           <KpiCard label="Products" value={products.length.toString()} icon={Package} />
           <KpiCard label="Low stock" value={lowStock.toString()} icon={AlertTriangle} />
           <KpiCard label="Out of stock" value={outOfStock.toString()} icon={XCircle} />
-          <KpiCard label="Inventory value" value={`$${inventoryValue.toLocaleString()}`} icon={DollarSign} />
+          <KpiCard
+            label="Inventory value"
+            value={`${currencySymbol(store.currencies[0] ?? "USD")}${inventoryValue.toLocaleString()}`}
+            icon={DollarSign}
+          />
         </StatGrid>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">

@@ -7,7 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ACCENTS, type Product, type ProductStatus } from "@/lib/mock/products";
+import {
+  ACCENTS,
+  generateVariants,
+  type Product,
+  type ProductStatus,
+  type ProductVariant,
+  type ProductVariantOption,
+} from "@/lib/mock/products";
+import { currencySymbol } from "@/lib/currency";
 import { cn } from "@/lib/utils";
 
 export interface ProductFormValues {
@@ -19,17 +27,21 @@ export interface ProductFormValues {
   accent: string;
   images: string[];
   relatedProductIds: string[];
+  options: ProductVariantOption[];
+  variants: ProductVariant[];
 }
 
 export function ProductForm({
   initial,
   catalog,
+  currency,
   onSave,
   onDelete,
   saveLabel,
 }: {
   initial?: Product;
   catalog: Product[];
+  currency: string;
   onSave: (values: ProductFormValues) => void;
   onDelete?: () => void;
   saveLabel: string;
@@ -43,10 +55,15 @@ export function ProductForm({
     accent: initial?.accent ?? ACCENTS[0],
     images: initial?.images ?? [],
     relatedProductIds: initial?.relatedProductIds ?? [],
+    options: initial?.options ?? [],
+    variants: initial?.variants ?? [],
   });
   const [imageUrl, setImageUrl] = useState("");
+  const [optionName, setOptionName] = useState("");
+  const [optionValues, setOptionValues] = useState("");
 
   const canSave = values.name.trim().length > 0;
+  const symbol = currencySymbol(currency);
 
   const addImage = () => {
     const url = imageUrl.trim();
@@ -63,6 +80,25 @@ export function ProductForm({
         ? v.relatedProductIds.filter((r) => r !== id)
         : [...v.relatedProductIds, id],
     }));
+  };
+
+  const addOption = () => {
+    const name = optionName.trim();
+    const vals = Array.from(new Set(optionValues.split(",").map((val) => val.trim()).filter(Boolean)));
+    if (!name || vals.length === 0 || values.options.some((o) => o.name === name)) return;
+    const nextOptions = [...values.options, { name, values: vals }];
+    setValues((v) => ({ ...v, options: nextOptions, variants: generateVariants(nextOptions, v.variants) }));
+    setOptionName("");
+    setOptionValues("");
+  };
+
+  const removeOption = (name: string) => {
+    const nextOptions = values.options.filter((o) => o.name !== name);
+    setValues((v) => ({ ...v, options: nextOptions, variants: generateVariants(nextOptions, v.variants) }));
+  };
+
+  const updateVariant = (id: string, patch: Partial<ProductVariant>) => {
+    setValues((v) => ({ ...v, variants: v.variants.map((variant) => (variant.id === id ? { ...variant, ...patch } : variant)) }));
   };
 
   return (
@@ -136,6 +172,100 @@ export function ProductForm({
           </p>
         </div>
 
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <Label className="text-xs text-muted-foreground">Variants</Label>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Add options like size or color to sell more than one version of this product.
+          </p>
+
+          {values.options.length > 0 && (
+            <div className="mt-3 flex flex-col gap-2">
+              {values.options.map((opt) => (
+                <div key={opt.name} className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">{opt.name}</p>
+                    <p className="truncate text-xs text-muted-foreground">{opt.values.join(", ")}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeOption(opt.name)}
+                    className="flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                    aria-label={`Remove ${opt.name}`}
+                  >
+                    <X className="size-3.5" strokeWidth={1.5} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            <Input
+              value={optionName}
+              onChange={(e) => setOptionName(e.target.value)}
+              placeholder="Option (e.g. Size)"
+              className="h-9 text-xs sm:w-36"
+            />
+            <Input
+              value={optionValues}
+              onChange={(e) => setOptionValues(e.target.value)}
+              placeholder="Values, comma separated (S, M, L)"
+              className="h-9 flex-1 text-xs"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addOption();
+                }
+              }}
+            />
+            <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={addOption}>
+              <Plus className="size-3.5" strokeWidth={1.5} />
+              Add option
+            </Button>
+          </div>
+
+          {values.variants.length > 0 && (
+            <div className="mt-4">
+              <div className="flex items-center gap-3 px-1 pb-1.5 text-xs text-muted-foreground">
+                <span className="flex-1">Variant</span>
+                <span className="w-20 text-center">Stock</span>
+                <span className="w-24 text-center">Price</span>
+              </div>
+              <div className="overflow-hidden rounded-lg border border-border">
+                <div className="flex flex-col divide-y divide-border">
+                  {values.variants.map((variant) => (
+                    <div key={variant.id} className="flex items-center gap-3 bg-background p-2.5">
+                      <p className="min-w-0 flex-1 truncate text-sm">{Object.values(variant.optionValues).join(" / ")}</p>
+                      <Input
+                        type="number"
+                        min={0}
+                        value={variant.stock}
+                        onChange={(e) => updateVariant(variant.id, { stock: Math.max(0, Number(e.target.value) || 0) })}
+                        className="h-8 w-20 text-xs"
+                        dir="ltr"
+                      />
+                      <Input
+                        type="number"
+                        min={0}
+                        value={variant.price ?? ""}
+                        onChange={(e) =>
+                          updateVariant(variant.id, { price: e.target.value ? Math.max(0, Number(e.target.value)) : undefined })
+                        }
+                        placeholder={`${symbol}${values.price}`}
+                        className="h-8 w-24 text-xs"
+                        dir="ltr"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Leave a variant&apos;s price blank to use the base price above.
+              </p>
+            </div>
+          )}
+        </div>
+
         {catalog.length > 0 && (
           <div className="rounded-2xl border border-border bg-card p-5">
             <Label className="text-xs text-muted-foreground">Related products</Label>
@@ -164,7 +294,7 @@ export function ProductForm({
       <div className="flex flex-col gap-5">
         <div className="rounded-2xl border border-border bg-card p-5">
           <div className="flex flex-col gap-1.5">
-            <Label className="text-xs text-muted-foreground">Price (USD)</Label>
+            <Label className="text-xs text-muted-foreground">Price ({currency})</Label>
             <Input
               type="number"
               min={0}

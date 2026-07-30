@@ -18,15 +18,17 @@ function NewProductWorkspace({ store }: { store: Store }) {
   const router = useRouter();
   const products = useMemo(() => getStoreProducts(store), [store]);
 
+  const currency = store.currencies[0] ?? "USD";
+
   const handleSave = (values: ProductFormValues) => {
-    saveStoreProducts(store.slug, [...products, createProduct(values)]);
+    saveStoreProducts(store.slug, [...products, createProduct({ ...values, currency })]);
     toast.success("Product added", { description: `${values.name} was added to the catalog.` });
     router.push(`/dashboard/stores/${store.slug}/products`);
   };
 
   return (
     <FeaturePageShell title="Add product" description="Add a new product to this store's catalog.">
-      <ProductForm catalog={products} onSave={handleSave} saveLabel="Add product" />
+      <ProductForm catalog={products} currency={currency} onSave={handleSave} saveLabel="Add product" />
     </FeaturePageShell>
   );
 }

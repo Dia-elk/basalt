@@ -118,6 +118,7 @@ export default function NewStorePage() {
       visitors: 0,
       createdAt: new Date().toISOString().slice(0, 10),
       features: data.features,
+      currencies: data.currencies,
     });
 
     setDeploying(true);

@@ -54,6 +54,7 @@ function EditProductWorkspace({ store, productId }: { store: Store; productId: s
       <ProductForm
         initial={product}
         catalog={products.filter((p) => p.id !== product.id)}
+        currency={product.currency}
         onSave={handleSave}
         onDelete={handleDelete}
         saveLabel="Save changes"

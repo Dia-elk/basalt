@@ -56,6 +56,10 @@ export interface BuilderPage {
   path: string;
   /** Ships as a ready-made template in the "add a page" picker (Home, Checkout, etc.) vs. a page the merchant named themselves. */
   builtin?: boolean;
+  seo?: {
+    title?: string;
+    description?: string;
+  };
 }
 
 export interface BlockContent {
@@ -117,15 +121,28 @@ export const PAGE_TEMPLATES: BuilderPage[] = [
  */
 const DEFAULT_PAGE_IDS = ["home", "products", "product-detail", "about", "contact", "checkout"];
 
-/** Turns a merchant-typed name into a fresh, non-template page. */
-export function createCustomPage(name: string): BuilderPage {
-  const trimmed = name.trim();
-  const slug =
-    trimmed
+/** Turns any page name into a URL-safe slug, e.g. for suggesting a route as the merchant types. */
+export function slugifyPageName(name: string): string {
+  return (
+    name
+      .trim()
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "") || "page";
-  return { id: `${slug}-${Date.now().toString(36)}`, name: trimmed || "Untitled page", path: `/${slug}` };
+      .replace(/^-+|-+$/g, "") || "page"
+  );
+}
+
+/** Builds a fresh, non-template page from the "add page" form's values. */
+export function createCustomPage(input: { name: string; path?: string; seo?: BuilderPage["seo"] }): BuilderPage {
+  const trimmed = input.name.trim();
+  const rawPath = input.path?.trim().replace(/^\/+/, "");
+  const slug = rawPath || slugifyPageName(trimmed);
+  return {
+    id: `${slugifyPageName(trimmed)}-${Date.now().toString(36)}`,
+    name: trimmed || "Untitled page",
+    path: `/${slug}`,
+    seo: input.seo,
+  };
 }
 
 export function addPageToComposition(composition: StoreComposition, page: BuilderPage): StoreComposition {

@@ -10,7 +10,7 @@ export interface WishlistEntry {
 }
 export function generateWishlist(store: Store): WishlistEntry[] {
   const rand = mulberry32(hashSeed(store.id + "wishlist"));
-  return generateProducts(store.id, store.businessType)
+  return generateProducts(store)
     .map((p) => ({ productName: p.name, saves: 8 + Math.floor(rand() * 140), accent: p.accent }))
     .sort((a, b) => b.saves - a.saves);
 }
@@ -37,7 +37,7 @@ const reviewQuotes: Record<ReviewRating, string[]> = {
 };
 export function generateReviews(store: Store): Review[] {
   const rand = mulberry32(hashSeed(store.id + "reviews"));
-  const products = generateProducts(store.id, store.businessType);
+  const products = generateProducts(store);
   const customers = generateCustomers(store.id);
   const ratingPool: ReviewRating[] = [5, 5, 5, 4, 4, 3, 5, 2];
   const days = [1, 2, 4, 6, 9];
@@ -147,7 +147,7 @@ export interface Bundle {
 }
 export function generateBundles(store: Store): Bundle[] {
   const rand = mulberry32(hashSeed(store.id + "bundles"));
-  const products = generateProducts(store.id, store.businessType);
+  const products = generateProducts(store);
   if (products.length < 2) return [];
   const bundleNames = ["Starter Bundle", "Best of the Season", "The Complete Set"];
   return bundleNames.map((name, i) => {

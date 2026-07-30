@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
-import { LayoutDashboard, Monitor, Smartphone, X } from "lucide-react";
+import { LayoutDashboard, Monitor, Plus, Smartphone, X } from "lucide-react";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { Button } from "@/components/ui/button";
@@ -12,13 +12,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { SortableBlock } from "@/components/builder/sortable-block";
 import { ComponentLibrary } from "@/components/builder/component-library";
 import { EditBlockPanel } from "@/components/builder/edit-block-panel";
-import { AddPageMenu } from "@/components/builder/add-page-menu";
 import {
   BLOCK_LIBRARY,
   getStoreComposition,
   saveStoreComposition,
   createBlock,
-  addPageToComposition,
   removePageFromComposition,
   type StoreComposition,
   type BlockType,
@@ -50,10 +48,15 @@ export default function StoreBuilderPage() {
     );
   }
 
-  return <BuilderWorkspace store={store} />;
+  return (
+    <Suspense fallback={null}>
+      <BuilderWorkspace store={store} />
+    </Suspense>
+  );
 }
 
 function BuilderWorkspace({ store }: { store: Store }) {
+  const searchParams = useSearchParams();
   const [composition, setComposition] = useState<StoreComposition | null>(null);
   const [pageId, setPageId] = useState("home");
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
@@ -63,7 +66,10 @@ function BuilderWorkspace({ store }: { store: Store }) {
   useEffect(() => {
     const loaded = getStoreComposition(store);
     setComposition(loaded);
-    setPageId(loaded.pages[0]?.id ?? "home");
+    const requested = searchParams.get("page");
+    const initial = requested && loaded.pages.some((p) => p.id === requested) ? requested : (loaded.pages[0]?.id ?? "home");
+    setPageId(initial);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store]);
 
   if (!composition) {
@@ -85,12 +91,6 @@ function BuilderWorkspace({ store }: { store: Store }) {
   const switchPage = (id: string) => {
     setPageId(id);
     setSelectedBlockId(null);
-  };
-
-  const handleAddPage = (page: BuilderPage) => {
-    persist(addPageToComposition(composition, page));
-    switchPage(page.id);
-    toast.success(`${page.name} added`, { description: "Add components to build it out." });
   };
 
   const handleRemovePage = (page: BuilderPage) => {
@@ -174,7 +174,13 @@ function BuilderWorkspace({ store }: { store: Store }) {
                 )}
               </div>
             ))}
-            <AddPageMenu existingIds={composition.pages.map((p) => p.id)} onAdd={handleAddPage} />
+            <Link
+              href={`/dashboard/stores/${store.slug}/builder/pages/new`}
+              aria-label="Add page"
+              className="flex size-7 shrink-0 items-center justify-center rounded-full border border-dashed border-border text-muted-foreground transition-colors hover:border-success/40 hover:text-foreground"
+            >
+              <Plus className="size-3.5" strokeWidth={1.5} />
+            </Link>
           </div>
         </div>
         <div className="flex items-center gap-3">

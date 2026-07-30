@@ -25,7 +25,7 @@ export default function StoreInventoryPage() {
   return (
     <StoreScopedPage slug={slug}>
       {(store) => {
-        const products = generateProducts(store.id, store.businessType);
+        const products = generateProducts(store);
         const lowStock = products.filter((p) => p.stock > 0 && p.stock < 10).length;
         const outOfStock = products.filter((p) => p.status === "out-of-stock").length;
 

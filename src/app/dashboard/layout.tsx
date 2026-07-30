@@ -17,7 +17,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const storeSlug = useStoreSlug();
   const isAiWorkspace = /^\/dashboard\/stores\/[^/]+\/ai-workspace/.test(pathname);
   const isAiWorkspacePreview = /^\/dashboard\/stores\/[^/]+\/ai-workspace\/preview/.test(pathname);
-  const isBuilder = /^\/dashboard\/stores\/[^/]+\/builder/.test(pathname);
+  const isBuilder = /^\/dashboard\/stores\/[^/]+\/builder\/?$/.test(pathname);
   const isFullPageFlow = isAiWorkspace || isBuilder || /^\/dashboard\/stores\/[^/]+\/domains\/buy/.test(pathname);
 
   return (

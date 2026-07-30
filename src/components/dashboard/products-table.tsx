@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { Product, ProductStatus } from "@/lib/mock/products";
+import { currencySymbol } from "@/lib/currency";
 import { cn } from "@/lib/utils";
 
 const statusVariant: Record<ProductStatus, "secondary" | "outline" | "destructive"> = {
@@ -55,7 +56,8 @@ export function ProductsTable({
                 <Badge variant={statusVariant[product.status]}>{statusLabel[product.status]}</Badge>
               </TableCell>
               <TableCell className="font-mono text-xs" dir="ltr">
-                ${product.price}
+                {currencySymbol(product.currency)}
+                {product.price}
               </TableCell>
               <TableCell className="font-mono text-xs" dir="ltr">
                 <span className={cn(product.stock === 0 && "text-destructive", product.stock > 0 && product.stock < 10 && "text-warning")}>

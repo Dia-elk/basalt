@@ -45,6 +45,8 @@ export interface Store {
   createdAt: string;
   /** Optional feature values from wizard-options' featureOptions, e.g. "wishlist", "reviews". Drives the dynamic sidebar. */
   features: string[];
+  /** Currencies this store checks out in, from the wizard's currency step. currencies[0] is the store's main currency. */
+  currencies: string[];
   /** Set once the store uploads its own logo/favicon. Until then, StoreLogo falls back to the platform mark — same pattern Vercel uses for projects without a custom domain favicon. */
   logoUrl?: string;
 }
@@ -67,6 +69,7 @@ export const stores: Store[] = [
     visitors: 18420,
     createdAt: "2026-02-11",
     features: ["wishlist", "reviews", "coupons", "loyalty", "gift-cards", "seo", "newsletter"],
+    currencies: ["EUR", "USD"],
     logoUrl: "https://images.unsplash.com/photo-1541643600914-78b084683601?q=80&w=200&auto=format&fit=crop",
   },
   {
@@ -86,6 +89,7 @@ export const stores: Store[] = [
     visitors: 24310,
     createdAt: "2025-11-03",
     features: ["wishlist", "reviews", "inventory", "seo", "faq", "newsletter"],
+    currencies: ["USD"],
   },
   {
     id: "cove-cosmetics",
@@ -104,6 +108,7 @@ export const stores: Store[] = [
     visitors: 15980,
     createdAt: "2026-04-22",
     features: ["wishlist", "reviews", "coupons", "referral", "bundles", "newsletter", "blog"],
+    currencies: ["GBP", "EUR"],
   },
   {
     id: "circuit-sons",
@@ -122,6 +127,7 @@ export const stores: Store[] = [
     visitors: 41200,
     createdAt: "2025-08-19",
     features: ["wishlist", "reviews", "coupons", "inventory", "analytics", "seo", "faq", "gift-cards"],
+    currencies: ["USD"],
   },
   {
     id: "whitfield-menswear",
@@ -140,6 +146,7 @@ export const stores: Store[] = [
     visitors: 20110,
     createdAt: "2025-12-30",
     features: ["wishlist", "reviews", "coupons", "loyalty", "seo"],
+    currencies: ["EUR", "USD"],
   },
   {
     id: "reading-room",
@@ -158,6 +165,7 @@ export const stores: Store[] = [
     visitors: 6340,
     createdAt: "2026-06-02",
     features: ["wishlist", "reviews", "blog", "faq"],
+    currencies: ["AED", "USD"],
   },
   {
     id: "sable-and-stone",
@@ -176,6 +184,7 @@ export const stores: Store[] = [
     visitors: 0,
     createdAt: "2026-07-18",
     features: ["seo", "faq"],
+    currencies: ["EUR"],
   },
 ];
 
