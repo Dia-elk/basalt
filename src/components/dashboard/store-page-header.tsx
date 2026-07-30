@@ -17,7 +17,7 @@ export function StorePageHeader({ store }: { store: Store }) {
 
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
-          <StoreLogo businessType={store.businessType} accent={store.accent} size="md" />
+          <StoreLogo logoUrl={store.logoUrl} name={store.name} size="md" />
           <div>
             <h1 className="text-xl font-medium">{store.name}</h1>
             <p className="text-xs text-muted-foreground">{store.businessType}</p>

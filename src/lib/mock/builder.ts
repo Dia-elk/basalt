@@ -61,12 +61,16 @@ export interface BlockContent {
   subheading?: string;
   body?: string;
   ctaLabel?: string;
+  ctaUrl?: string;
   imageUrl?: string;
   backgroundColor?: string;
+  textColor?: string;
+  textAlign?: "start" | "center";
+  itemLimit?: number;
   items?: { title: string; description?: string }[];
 }
 
-export type BuilderFieldType = "text" | "textarea" | "color" | "image" | "list";
+export type BuilderFieldType = "text" | "textarea" | "color" | "image" | "url" | "list" | "align" | "number";
 
 export interface BuilderField {
   key: keyof BlockContent;
@@ -74,6 +78,8 @@ export interface BuilderField {
   type: BuilderFieldType;
   placeholder?: string;
   maxLength?: number;
+  min?: number;
+  max?: number;
 }
 
 export interface Block {
@@ -140,23 +146,37 @@ export const BLOCK_FEATURE_MAP: Partial<Record<BlockType, string>> = {
  * expose heading + color — the items themselves aren't hand-authored here.
  */
 const COLOR_FIELD: BuilderField = { key: "backgroundColor", label: "Background color", type: "color" };
+const TEXT_COLOR_FIELD: BuilderField = { key: "textColor", label: "Text color", type: "color" };
+const ALIGN_FIELD: BuilderField = { key: "textAlign", label: "Text alignment", type: "align" };
 const HEADING_FIELD: BuilderField = { key: "heading", label: "Heading", type: "text", maxLength: 60 };
+const CTA_URL_FIELD: BuilderField = { key: "ctaUrl", label: "Button link", type: "url", placeholder: "https://…" };
+const ctaLabelField = (max: number): BuilderField => ({ key: "ctaLabel", label: "Button label", type: "text", maxLength: max });
+const itemLimitField = (max: number): BuilderField => ({ key: "itemLimit", label: "Items to show", type: "number", min: 1, max });
 
 export const BLOCK_FIELDS: Record<BlockType, BuilderField[]> = {
   hero: [
     HEADING_FIELD,
     { key: "subheading", label: "Subheading", type: "textarea", maxLength: 140 },
-    { key: "ctaLabel", label: "Button label", type: "text", maxLength: 24 },
+    ALIGN_FIELD,
+    ctaLabelField(24),
+    CTA_URL_FIELD,
     { key: "imageUrl", label: "Background image URL", type: "image" },
+    TEXT_COLOR_FIELD,
     COLOR_FIELD,
   ],
-  "product-grid": [HEADING_FIELD, COLOR_FIELD],
+  "product-grid": [HEADING_FIELD, itemLimitField(8), COLOR_FIELD],
   "featured-collection": [HEADING_FIELD, COLOR_FIELD],
   "feature-cards": [HEADING_FIELD, { key: "items", label: "Value props", type: "list" }, COLOR_FIELD],
-  testimonials: [HEADING_FIELD, COLOR_FIELD],
-  "cta-banner": [HEADING_FIELD, { key: "ctaLabel", label: "Button label", type: "text", maxLength: 24 }, COLOR_FIELD],
-  faq: [HEADING_FIELD, COLOR_FIELD],
-  newsletter: [HEADING_FIELD, { key: "body", label: "Description", type: "textarea", maxLength: 140 }, COLOR_FIELD],
+  testimonials: [HEADING_FIELD, itemLimitField(5), COLOR_FIELD],
+  "cta-banner": [HEADING_FIELD, ALIGN_FIELD, ctaLabelField(24), CTA_URL_FIELD, TEXT_COLOR_FIELD, COLOR_FIELD],
+  faq: [HEADING_FIELD, itemLimitField(4), COLOR_FIELD],
+  newsletter: [
+    HEADING_FIELD,
+    { key: "body", label: "Description", type: "textarea", maxLength: 140 },
+    ALIGN_FIELD,
+    TEXT_COLOR_FIELD,
+    COLOR_FIELD,
+  ],
   "image-split": [
     HEADING_FIELD,
     { key: "body", label: "Body text", type: "textarea", maxLength: 280 },
@@ -166,30 +186,39 @@ export const BLOCK_FIELDS: Record<BlockType, BuilderField[]> = {
   "marquee-logos": [COLOR_FIELD],
   "coupon-banner": [HEADING_FIELD, { key: "body", label: "Details", type: "textarea", maxLength: 140 }, COLOR_FIELD],
   "loyalty-widget": [HEADING_FIELD, COLOR_FIELD],
-  "gift-card-promo": [HEADING_FIELD, { key: "ctaLabel", label: "Button label", type: "text", maxLength: 24 }, COLOR_FIELD],
+  "gift-card-promo": [HEADING_FIELD, ctaLabelField(24), CTA_URL_FIELD, COLOR_FIELD],
   "bundle-showcase": [HEADING_FIELD, COLOR_FIELD],
-  "blog-feed": [HEADING_FIELD, COLOR_FIELD],
+  "blog-feed": [HEADING_FIELD, itemLimitField(3), COLOR_FIELD],
   "referral-banner": [HEADING_FIELD, { key: "body", label: "Details", type: "textarea", maxLength: 140 }, COLOR_FIELD],
 };
 
 const DEFAULT_CONTENT: Record<BlockType, BlockContent> = {
-  hero: { heading: "Welcome to the store", subheading: "Quality pieces, thoughtfully chosen.", ctaLabel: "Shop now" },
-  "product-grid": { heading: "Best sellers" },
+  hero: {
+    heading: "Welcome to the store",
+    subheading: "Quality pieces, thoughtfully chosen.",
+    ctaLabel: "Shop now",
+    textAlign: "center",
+  },
+  "product-grid": { heading: "Best sellers", itemLimit: 4 },
   "featured-collection": { heading: "Featured collection" },
   "feature-cards": {
     items: [{ title: "Free shipping" }, { title: "Easy returns" }, { title: "Secure checkout" }],
   },
-  testimonials: { heading: "What customers say", items: [] },
-  "cta-banner": { heading: "Ready to shop?", ctaLabel: "Browse the collection" },
-  faq: { heading: "Frequently asked questions", items: [] },
-  newsletter: { heading: "Stay in the loop", body: "Get new arrivals and offers in your inbox." },
+  testimonials: { heading: "What customers say", itemLimit: 2, items: [] },
+  "cta-banner": { heading: "Ready to shop?", ctaLabel: "Browse the collection", textAlign: "center" },
+  faq: { heading: "Frequently asked questions", itemLimit: 3, items: [] },
+  newsletter: {
+    heading: "Stay in the loop",
+    body: "Get new arrivals and offers in your inbox.",
+    textAlign: "center",
+  },
   "image-split": { heading: "Our story" },
   "marquee-logos": {},
   "coupon-banner": { heading: "10% off your first order", body: "Use code WELCOME10 at checkout." },
   "loyalty-widget": { heading: "Earn points on every order" },
   "gift-card-promo": { heading: "Give a gift card", ctaLabel: "Buy a gift card" },
   "bundle-showcase": { heading: "Bundle & save" },
-  "blog-feed": { heading: "From the journal" },
+  "blog-feed": { heading: "From the journal", itemLimit: 3 },
   "referral-banner": { heading: "Give $10, get $10", body: "Invite a friend and you both save." },
 };
 

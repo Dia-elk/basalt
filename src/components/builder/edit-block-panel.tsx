@@ -1,11 +1,12 @@
 "use client";
 
-import { Plus, Trash2, X } from "lucide-react";
+import { AlignLeft, AlignCenter, Plus, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { BLOCK_FIELDS, BLOCK_LIBRARY, type Block, type BlockContent, type BuilderField } from "@/lib/mock/builder";
+import { cn } from "@/lib/utils";
 
 type ListItem = { title: string; description?: string };
 
@@ -112,13 +113,58 @@ function FieldControl({
     );
   }
 
-  if (field.type === "image") {
+  if (field.type === "image" || field.type === "url") {
     return (
       <Input
         value={text}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="https://…"
+        placeholder={field.placeholder ?? "https://…"}
         className="h-9 text-xs"
+        dir="ltr"
+      />
+    );
+  }
+
+  if (field.type === "align") {
+    const align = (value as "start" | "center" | undefined) ?? "center";
+    return (
+      <div className="inline-flex w-fit rounded-lg border border-border p-0.5">
+        {(
+          [
+            { value: "start" as const, icon: AlignLeft, label: "Left" },
+            { value: "center" as const, icon: AlignCenter, label: "Center" },
+          ]
+        ).map((opt) => (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => onChange(opt.value)}
+            className={cn(
+              "flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
+              align === opt.value ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <opt.icon className="size-3.5" strokeWidth={1.5} />
+            {opt.label}
+          </button>
+        ))}
+      </div>
+    );
+  }
+
+  if (field.type === "number") {
+    const num = (value as number | undefined) ?? field.min ?? 1;
+    return (
+      <Input
+        type="number"
+        value={num}
+        min={field.min}
+        max={field.max}
+        onChange={(e) => {
+          const next = Number(e.target.value);
+          if (!Number.isNaN(next)) onChange(Math.min(field.max ?? next, Math.max(field.min ?? next, next)));
+        }}
+        className="h-9 w-24 text-xs"
         dir="ltr"
       />
     );

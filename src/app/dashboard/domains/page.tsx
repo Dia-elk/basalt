@@ -57,7 +57,7 @@ export default function DomainsPage() {
                 <div key={d.id} className="flex flex-col gap-4 bg-card p-4">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex min-w-0 flex-1 items-center gap-3">
-                      {store && <StoreLogo businessType={store.businessType} accent={store.accent} size="sm" />}
+                      {store && <StoreLogo logoUrl={store.logoUrl} name={store.name} size="sm" />}
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
                           <DomainStatusBadge status={d.status} />
@@ -134,7 +134,7 @@ export default function DomainsPage() {
                     onClick={() => setExpandedId(expanded ? null : d.id)}
                     className="flex min-w-0 flex-1 items-center gap-3 text-start"
                   >
-                    {store && <StoreLogo businessType={store.businessType} accent={store.accent} size="sm" />}
+                    {store && <StoreLogo logoUrl={store.logoUrl} name={store.name} size="sm" />}
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <p className="truncate text-sm font-medium">{d.domain}</p>

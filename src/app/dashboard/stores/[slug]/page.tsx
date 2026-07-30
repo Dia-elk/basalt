@@ -59,7 +59,7 @@ export default function StoreOverviewPage() {
 
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div className="flex items-center gap-3.5">
-          <StoreLogo businessType={store.businessType} accent={store.accent} size="lg" />
+          <StoreLogo logoUrl={store.logoUrl} name={store.name} size="lg" />
           <div>
             <h1 className="text-xl font-medium">{store.name}</h1>
             <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">

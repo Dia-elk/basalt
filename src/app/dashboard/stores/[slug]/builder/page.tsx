@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
-import { LayoutDashboard } from "lucide-react";
+import { LayoutDashboard, Monitor, Smartphone } from "lucide-react";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { Button } from "@/components/ui/button";
@@ -54,6 +54,7 @@ function BuilderWorkspace({ store }: { store: Store }) {
   const [composition, setComposition] = useState<StoreComposition | null>(null);
   const [pageId, setPageId] = useState("home");
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
+  const [viewport, setViewport] = useState<"desktop" | "mobile">("desktop");
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   useEffect(() => {
@@ -139,33 +140,66 @@ function BuilderWorkspace({ store }: { store: Store }) {
             ))}
           </div>
         </div>
-        <p className="hidden text-xs text-muted-foreground sm:block">Changes save automatically</p>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-0.5 rounded-lg border border-border p-0.5">
+            <button
+              type="button"
+              onClick={() => setViewport("desktop")}
+              aria-label="Desktop preview"
+              className={cn(
+                "flex size-7 items-center justify-center rounded-md transition-colors",
+                viewport === "desktop" ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Monitor className="size-3.5" strokeWidth={1.5} />
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewport("mobile")}
+              aria-label="Mobile preview"
+              className={cn(
+                "flex size-7 items-center justify-center rounded-md transition-colors",
+                viewport === "mobile" ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Smartphone className="size-3.5" strokeWidth={1.5} />
+            </button>
+          </div>
+          <p className="hidden text-xs text-muted-foreground sm:block">Changes save automatically</p>
+        </div>
       </div>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[1fr_320px]">
-        <div className="overflow-y-auto">
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
-              <div className="flex flex-col">
-                {blocks.length > 0 ? (
-                  blocks.map((block) => (
-                    <SortableBlock
-                      key={block.id}
-                      block={block}
-                      store={store}
-                      selected={block.id === selectedBlockId}
-                      onSelect={setSelectedBlockId}
-                      onRemove={handleRemove}
-                    />
-                  ))
-                ) : (
-                  <div className="flex min-h-[400px] items-center justify-center p-14 text-center text-sm text-muted-foreground">
-                    This page is empty. Add a component from the library.
-                  </div>
-                )}
-              </div>
-            </SortableContext>
-          </DndContext>
+        <div className={cn("overflow-y-auto", viewport === "mobile" && "bg-muted/20 py-8")}>
+          <div
+            className={cn(
+              "@container",
+              viewport === "mobile" && "mx-auto max-w-[390px] overflow-hidden rounded-2xl border border-border bg-background shadow-xl"
+            )}
+          >
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
+                <div className="flex flex-col">
+                  {blocks.length > 0 ? (
+                    blocks.map((block) => (
+                      <SortableBlock
+                        key={block.id}
+                        block={block}
+                        store={store}
+                        selected={block.id === selectedBlockId}
+                        onSelect={setSelectedBlockId}
+                        onRemove={handleRemove}
+                      />
+                    ))
+                  ) : (
+                    <div className="flex min-h-[400px] items-center justify-center p-14 text-center text-sm text-muted-foreground">
+                      This page is empty. Add a component from the library.
+                    </div>
+                  )}
+                </div>
+              </SortableContext>
+            </DndContext>
+          </div>
         </div>
 
         <div className="hidden border-s border-border p-3 lg:block">

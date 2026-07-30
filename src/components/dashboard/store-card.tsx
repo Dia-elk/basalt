@@ -26,7 +26,7 @@ export function StoreCard({ store }: { store: Store }) {
       <div className="relative flex flex-col gap-5 p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 flex-1 items-center gap-3">
-            <StoreLogo businessType={store.businessType} accent={store.accent} size="lg" />
+            <StoreLogo logoUrl={store.logoUrl} name={store.name} size="lg" />
             <div className="min-w-0 flex-1">
               <h3 className="truncate text-[15px] font-medium">{store.name}</h3>
               <p className="text-xs text-muted-foreground">{store.businessType}</p>

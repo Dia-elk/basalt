@@ -3,13 +3,19 @@ import { generateTopProducts } from "@/lib/mock/analytics";
 import { generateReviews, generateFaqEntries } from "@/lib/mock/store-features";
 import { BLOCK_LIBRARY, type Block } from "@/lib/mock/builder";
 import type { Store } from "@/lib/mock/stores";
+import { cn } from "@/lib/utils";
+
+function alignClasses(align: "start" | "center" | undefined) {
+  return align === "start" ? "items-start text-start" : "items-center text-center";
+}
 
 function HeroBlock({ block, store }: { block: Block; store: Store }) {
-  const { heading, subheading, ctaLabel, imageUrl, backgroundColor } = block.content;
+  const { heading, subheading, ctaLabel, imageUrl, backgroundColor, textColor, textAlign } = block.content;
   return (
     <div
-      className="flex flex-col items-center gap-3 bg-cover bg-center px-6 py-20 text-center"
+      className={cn("flex flex-col gap-3 bg-cover bg-center px-6 py-20 @md:px-10", alignClasses(textAlign))}
       style={{
+        color: textColor,
         backgroundImage: imageUrl
           ? `linear-gradient(0deg, rgba(0,0,0,.45), rgba(0,0,0,.45)), url(${imageUrl})`
           : !backgroundColor
@@ -17,8 +23,10 @@ function HeroBlock({ block, store }: { block: Block; store: Store }) {
             : undefined,
       }}
     >
-      <h2 className="max-w-lg text-3xl font-semibold text-balance">{heading}</h2>
-      {subheading && <p className="max-w-sm text-sm text-muted-foreground">{subheading}</p>}
+      <h2 className="max-w-lg text-2xl font-semibold text-balance @md:text-3xl">{heading}</h2>
+      {subheading && (
+        <p className={cn("max-w-sm text-sm", !textColor && "text-muted-foreground")}>{subheading}</p>
+      )}
       {ctaLabel && (
         <span
           className="mt-2 rounded-lg px-5 py-2.5 text-sm font-medium"
@@ -32,11 +40,11 @@ function HeroBlock({ block, store }: { block: Block; store: Store }) {
 }
 
 function ProductGridBlock({ block, store }: { block: Block; store: Store }) {
-  const products = generateTopProducts(store.id, store.businessType).slice(0, 4);
+  const products = generateTopProducts(store.id, store.businessType).slice(0, block.content.itemLimit ?? 4);
   return (
-    <div className="px-6 py-14 sm:px-10">
+    <div className="px-6 py-14 @md:px-10">
       {block.content.heading && <h3 className="mb-6 text-center text-lg font-medium">{block.content.heading}</h3>}
-      <div className="mx-auto grid max-w-5xl grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="mx-auto grid max-w-5xl grid-cols-2 gap-4 @md:grid-cols-4">
         {products.map((p) => (
           <div key={p.name} className="flex flex-col gap-2.5">
             <div className="aspect-square rounded-lg bg-gradient-to-br from-muted to-secondary" />
@@ -52,11 +60,11 @@ function ProductGridBlock({ block, store }: { block: Block; store: Store }) {
 }
 
 function TestimonialsBlock({ block, store }: { block: Block; store: Store }) {
-  const reviews = generateReviews(store).slice(0, 2);
+  const reviews = generateReviews(store).slice(0, block.content.itemLimit ?? 2);
   return (
-    <div className="px-6 py-14 sm:px-10">
+    <div className="px-6 py-14 @md:px-10">
       {block.content.heading && <h3 className="mb-6 text-center text-lg font-medium">{block.content.heading}</h3>}
-      <div className="mx-auto grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="mx-auto grid max-w-3xl grid-cols-1 gap-4 @md:grid-cols-2">
         {reviews.map((r) => (
           <div key={r.id} className="rounded-xl border border-border bg-card p-4">
             <p className="text-sm text-muted-foreground">&ldquo;{r.quote}&rdquo;</p>
@@ -69,9 +77,9 @@ function TestimonialsBlock({ block, store }: { block: Block; store: Store }) {
 }
 
 function FaqBlock({ block, store }: { block: Block; store: Store }) {
-  const entries = generateFaqEntries(store).slice(0, 3);
+  const entries = generateFaqEntries(store).slice(0, block.content.itemLimit ?? 3);
   return (
-    <div className="px-6 py-14 sm:px-10">
+    <div className="px-6 py-14 @md:px-10">
       {block.content.heading && <h3 className="mb-6 text-center text-lg font-medium">{block.content.heading}</h3>}
       <div className="mx-auto flex max-w-2xl flex-col divide-y divide-border rounded-xl border border-border">
         {entries.map((e) => (
@@ -85,14 +93,14 @@ function FaqBlock({ block, store }: { block: Block; store: Store }) {
 }
 
 function NewsletterBlock({ block, store }: { block: Block; store: Store }) {
-  const { heading, body, backgroundColor } = block.content;
+  const { heading, body, backgroundColor, textColor, textAlign } = block.content;
   return (
     <div
-      className="flex flex-col items-center gap-3 px-6 py-16 text-center"
-      style={{ backgroundColor: backgroundColor ? undefined : `${store.accent}14` }}
+      className={cn("flex flex-col gap-3 px-6 py-16 @md:px-10", alignClasses(textAlign))}
+      style={{ color: textColor, backgroundColor: backgroundColor ? undefined : `${store.accent}14` }}
     >
       <h3 className="text-xl font-medium">{heading}</h3>
-      {body && <p className="max-w-sm text-sm text-muted-foreground">{body}</p>}
+      {body && <p className={cn("max-w-sm text-sm", !textColor && "text-muted-foreground")}>{body}</p>}
       <div className="mt-1 flex w-full max-w-xs items-center gap-2 rounded-lg border border-border bg-background px-3 py-2">
         <span className="flex-1 text-start text-xs text-muted-foreground">you@email.com</span>
         <span
@@ -107,11 +115,11 @@ function NewsletterBlock({ block, store }: { block: Block; store: Store }) {
 }
 
 function CtaBannerBlock({ block, store }: { block: Block; store: Store }) {
-  const { heading, ctaLabel, backgroundColor } = block.content;
+  const { heading, ctaLabel, backgroundColor, textColor, textAlign } = block.content;
   return (
     <div
-      className="flex flex-col items-center gap-3 px-6 py-16 text-center"
-      style={{ backgroundColor: backgroundColor ? undefined : `${store.accent}14` }}
+      className={cn("flex flex-col gap-3 px-6 py-16 @md:px-10", alignClasses(textAlign))}
+      style={{ color: textColor, backgroundColor: backgroundColor ? undefined : `${store.accent}14` }}
     >
       <h3 className="text-xl font-medium">{heading}</h3>
       {ctaLabel && (

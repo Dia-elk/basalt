@@ -45,6 +45,8 @@ export interface Store {
   createdAt: string;
   /** Optional feature values from wizard-options' featureOptions, e.g. "wishlist", "reviews". Drives the dynamic sidebar. */
   features: string[];
+  /** Set once the store uploads its own logo/favicon. Until then, StoreLogo falls back to the platform mark — same pattern Vercel uses for projects without a custom domain favicon. */
+  logoUrl?: string;
 }
 
 export const stores: Store[] = [
@@ -65,6 +67,7 @@ export const stores: Store[] = [
     visitors: 18420,
     createdAt: "2026-02-11",
     features: ["wishlist", "reviews", "coupons", "loyalty", "gift-cards", "seo", "newsletter"],
+    logoUrl: "https://images.unsplash.com/photo-1541643600914-78b084683601?q=80&w=200&auto=format&fit=crop",
   },
   {
     id: "northfield-furniture",
