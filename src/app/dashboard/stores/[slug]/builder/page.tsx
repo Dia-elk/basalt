@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
-import { LayoutDashboard, Monitor, Smartphone } from "lucide-react";
+import { LayoutDashboard, Monitor, Smartphone, X } from "lucide-react";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { Button } from "@/components/ui/button";
@@ -12,15 +12,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { SortableBlock } from "@/components/builder/sortable-block";
 import { ComponentLibrary } from "@/components/builder/component-library";
 import { EditBlockPanel } from "@/components/builder/edit-block-panel";
+import { AddPageMenu } from "@/components/builder/add-page-menu";
 import {
-  STOREFRONT_PAGES,
   BLOCK_LIBRARY,
   getStoreComposition,
   saveStoreComposition,
   createBlock,
+  addPageToComposition,
+  removePageFromComposition,
   type StoreComposition,
   type BlockType,
   type BlockContent,
+  type BuilderPage,
 } from "@/lib/mock/builder";
 import { useStore } from "@/hooks/use-store";
 import type { Store } from "@/lib/mock/stores";
@@ -58,7 +61,9 @@ function BuilderWorkspace({ store }: { store: Store }) {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   useEffect(() => {
-    setComposition(getStoreComposition(store));
+    const loaded = getStoreComposition(store);
+    setComposition(loaded);
+    setPageId(loaded.pages[0]?.id ?? "home");
   }, [store]);
 
   if (!composition) {
@@ -69,7 +74,7 @@ function BuilderWorkspace({ store }: { store: Store }) {
     );
   }
 
-  const blocks = composition[pageId] ?? [];
+  const blocks = composition.blocks[pageId] ?? [];
   const selectedBlock = blocks.find((b) => b.id === selectedBlockId) ?? null;
 
   const persist = (next: StoreComposition) => {
@@ -82,30 +87,50 @@ function BuilderWorkspace({ store }: { store: Store }) {
     setSelectedBlockId(null);
   };
 
+  const handleAddPage = (page: BuilderPage) => {
+    persist(addPageToComposition(composition, page));
+    switchPage(page.id);
+    toast.success(`${page.name} added`, { description: "Add components to build it out." });
+  };
+
+  const handleRemovePage = (page: BuilderPage) => {
+    if (composition.pages.length <= 1) {
+      toast.error("Can't remove the last page", { description: "A store needs at least one page." });
+      return;
+    }
+    const next = removePageFromComposition(composition, page.id);
+    persist(next);
+    if (pageId === page.id) switchPage(next.pages[0].id);
+    toast.info(`${page.name} removed`);
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
     const oldIndex = blocks.findIndex((b) => b.id === active.id);
     const newIndex = blocks.findIndex((b) => b.id === over.id);
     if (oldIndex === -1 || newIndex === -1) return;
-    persist({ ...composition, [pageId]: arrayMove(blocks, oldIndex, newIndex) });
+    persist({ ...composition, blocks: { ...composition.blocks, [pageId]: arrayMove(blocks, oldIndex, newIndex) } });
   };
 
   const handleAdd = (type: BlockType) => {
     const block = createBlock(type);
-    persist({ ...composition, [pageId]: [...blocks, block] });
+    persist({ ...composition, blocks: { ...composition.blocks, [pageId]: [...blocks, block] } });
     setSelectedBlockId(block.id);
     const name = BLOCK_LIBRARY.find((b) => b.type === type)?.name ?? type;
     toast.success(`${name} added`, { description: "Edit it on the right, or drag to reorder." });
   };
 
   const handleRemove = (id: string) => {
-    persist({ ...composition, [pageId]: blocks.filter((b) => b.id !== id) });
+    persist({ ...composition, blocks: { ...composition.blocks, [pageId]: blocks.filter((b) => b.id !== id) } });
     if (selectedBlockId === id) setSelectedBlockId(null);
   };
 
   const handleContentChange = (id: string, content: BlockContent) => {
-    persist({ ...composition, [pageId]: blocks.map((b) => (b.id === id ? { ...b, content } : b)) });
+    persist({
+      ...composition,
+      blocks: { ...composition.blocks, [pageId]: blocks.map((b) => (b.id === id ? { ...b, content } : b)) },
+    });
   };
 
   return (
@@ -123,21 +148,33 @@ function BuilderWorkspace({ store }: { store: Store }) {
           </Button>
           <div className="hidden h-4 w-px bg-border sm:block" />
           <div className="flex flex-wrap items-center gap-1.5">
-            {STOREFRONT_PAGES.map((page) => (
-              <button
+            {composition.pages.map((page) => (
+              <div
                 key={page.id}
-                type="button"
-                onClick={() => switchPage(page.id)}
                 className={cn(
-                  "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                  "flex items-center gap-1 rounded-full border py-1.5 ps-3 text-xs font-medium transition-colors",
+                  pageId === page.id ? "pe-1.5" : "pe-3",
                   pageId === page.id
                     ? "border-foreground/30 bg-secondary text-foreground"
                     : "border-border text-muted-foreground hover:text-foreground"
                 )}
               >
-                {page.name}
-              </button>
+                <button type="button" onClick={() => switchPage(page.id)}>
+                  {page.name}
+                </button>
+                {pageId === page.id && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemovePage(page)}
+                    className="flex size-4 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                    aria-label={`Remove ${page.name} page`}
+                  >
+                    <X className="size-3" strokeWidth={1.5} />
+                  </button>
+                )}
+              </div>
             ))}
+            <AddPageMenu existingIds={composition.pages.map((p) => p.id)} onAdd={handleAddPage} />
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -174,7 +211,8 @@ function BuilderWorkspace({ store }: { store: Store }) {
           <div
             className={cn(
               "@container",
-              viewport === "mobile" && "mx-auto max-w-[390px] overflow-hidden rounded-2xl border border-border bg-background shadow-xl"
+              viewport === "mobile" &&
+                "mx-auto max-w-[390px] overflow-hidden rounded-2xl border border-border bg-background shadow-xl"
             )}
           >
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>

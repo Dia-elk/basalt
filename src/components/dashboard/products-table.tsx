@@ -41,7 +41,7 @@ export function ProductsTable({
         </TableHeader>
         <TableBody>
           {products.map((product) => (
-            <TableRow key={product.id} className="group">
+            <TableRow key={product.id} className="group cursor-pointer" onClick={() => onEdit(product)}>
               <TableCell className="pl-4">
                 <div className="flex items-center gap-3">
                   <div
@@ -68,6 +68,7 @@ export function ProductsTable({
                     render={
                       <button
                         type="button"
+                        onClick={(e) => e.stopPropagation()}
                         className="flex size-7 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity hover:bg-accent hover:text-foreground group-hover:opacity-100 data-[popup-open]:opacity-100"
                         aria-label={`Actions for ${product.name}`}
                       />
@@ -76,11 +77,22 @@ export function ProductsTable({
                     <MoreHorizontal className="size-4" strokeWidth={1.5} />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => onEdit(product)}>
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEdit(product);
+                      }}
+                    >
                       <Pencil className="size-3.5" strokeWidth={1.5} />
                       Edit
                     </DropdownMenuItem>
-                    <DropdownMenuItem variant="destructive" onClick={() => onDelete(product)}>
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(product);
+                      }}
+                    >
                       <Trash2 className="size-3.5" strokeWidth={1.5} />
                       Delete
                     </DropdownMenuItem>

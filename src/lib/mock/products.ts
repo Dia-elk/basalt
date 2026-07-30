@@ -5,11 +5,15 @@ export type ProductStatus = "active" | "draft" | "out-of-stock";
 export interface Product {
   id: string;
   name: string;
+  description?: string;
   price: number;
   currency: string;
   stock: number;
   status: ProductStatus;
   accent: string;
+  images?: string[];
+  /** Other product ids from the same store, shown as cross-sells on this product's page. */
+  relatedProductIds?: string[];
 }
 
 // A few generic sample products per business type, so the grid looks populated.

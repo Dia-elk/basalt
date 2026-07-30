@@ -54,6 +54,8 @@ export interface BuilderPage {
   id: string;
   name: string;
   path: string;
+  /** Ships as a ready-made template in the "add a page" picker (Home, Checkout, etc.) vs. a page the merchant named themselves. */
+  builtin?: boolean;
 }
 
 export interface BlockContent {
@@ -90,17 +92,55 @@ export interface Block {
 
 export type PageComposition = Block[];
 
-/** A store's full set of pages, each with its own ordered block list. Saved as JSON per store. */
-export type StoreComposition = Record<string, PageComposition>;
+/** A store's actual pages (in order) plus the block list for each. Saved as JSON per store. */
+export interface StoreComposition {
+  pages: BuilderPage[];
+  blocks: Record<string, PageComposition>;
+}
 
-/** The storefront pages every store can compose. */
-export const STOREFRONT_PAGES: BuilderPage[] = [
-  { id: "home", name: "Home", path: "/" },
-  { id: "products", name: "Products", path: "/products" },
-  { id: "product-detail", name: "Product", path: "/products/:slug" },
-  { id: "about", name: "About", path: "/about" },
-  { id: "contact", name: "Contact", path: "/contact" },
+/** The library of prebuilt page templates a store can start with, or add back later if removed. */
+export const PAGE_TEMPLATES: BuilderPage[] = [
+  { id: "home", name: "Home", path: "/", builtin: true },
+  { id: "products", name: "Products", path: "/products", builtin: true },
+  { id: "product-detail", name: "Product", path: "/products/:slug", builtin: true },
+  { id: "checkout", name: "Checkout", path: "/checkout", builtin: true },
+  { id: "about", name: "About", path: "/about", builtin: true },
+  { id: "contact", name: "Contact", path: "/contact", builtin: true },
+  { id: "faq-page", name: "FAQ", path: "/faq", builtin: true },
+  { id: "blog-page", name: "Blog", path: "/blog", builtin: true },
 ];
+
+/**
+ * Pages every new store starts with. Home and Checkout are the ones a store
+ * can't really sell without, so they're provisioned by default — but like any
+ * page here, the merchant can still remove them from the Builder if they want.
+ */
+const DEFAULT_PAGE_IDS = ["home", "products", "product-detail", "about", "contact", "checkout"];
+
+/** Turns a merchant-typed name into a fresh, non-template page. */
+export function createCustomPage(name: string): BuilderPage {
+  const trimmed = name.trim();
+  const slug =
+    trimmed
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "page";
+  return { id: `${slug}-${Date.now().toString(36)}`, name: trimmed || "Untitled page", path: `/${slug}` };
+}
+
+export function addPageToComposition(composition: StoreComposition, page: BuilderPage): StoreComposition {
+  if (composition.pages.some((p) => p.id === page.id)) return composition;
+  return {
+    pages: [...composition.pages, page],
+    blocks: { ...composition.blocks, [page.id]: composition.blocks[page.id] ?? [] },
+  };
+}
+
+export function removePageFromComposition(composition: StoreComposition, pageId: string): StoreComposition {
+  const blocks = { ...composition.blocks };
+  delete blocks[pageId];
+  return { pages: composition.pages.filter((p) => p.id !== pageId), blocks };
+}
 
 export type BlockCategory = "Layout" | "Products" | "Trust" | "Marketing";
 
@@ -265,19 +305,19 @@ function seedCompositionForStore(store: Store): StoreComposition {
 
   homeBlocks.push(makeBlock("cta-banner"));
 
-  return {
-    home: homeBlocks,
-    products: [],
-    "product-detail": [],
-    about: [],
-    contact: [],
-  };
+  const pages = PAGE_TEMPLATES.filter((p) => DEFAULT_PAGE_IDS.includes(p.id));
+  const blocks: Record<string, PageComposition> = { home: homeBlocks };
+  pages.forEach((p) => {
+    if (p.id !== "home") blocks[p.id] = [];
+  });
+
+  return { pages, blocks };
 }
 
 /** Every feature value whose block type appears anywhere in the composition. */
 export function featuresFromComposition(composition: StoreComposition): string[] {
   const found = new Set<string>();
-  Object.values(composition).forEach((blocks) => {
+  Object.values(composition.blocks).forEach((blocks) => {
     blocks.forEach((block) => {
       const feature = BLOCK_FEATURE_MAP[block.type];
       if (feature) found.add(feature);
@@ -295,7 +335,10 @@ export function getStoreComposition(store: Store): StoreComposition {
   const raw = window.sessionStorage.getItem(`${COMPOSITION_PREFIX}${store.slug}`);
   if (raw) {
     try {
-      return JSON.parse(raw) as StoreComposition;
+      const parsed = JSON.parse(raw) as StoreComposition;
+      if (Array.isArray(parsed.pages) && parsed.blocks && typeof parsed.blocks === "object") {
+        return parsed;
+      }
     } catch {
       // fall through and reseed
     }
