@@ -1,4 +1,4 @@
-import type { BusinessType } from "@/lib/mock/stores";
+import type { BusinessType, Store } from "@/lib/mock/stores";
 
 export type ProductStatus = "active" | "draft" | "out-of-stock";
 
@@ -33,7 +33,7 @@ function hashSeed(input: string): number {
   return h >>> 0;
 }
 
-const ACCENTS = ["#D4AF6A", "#8B6A4F", "#5B8DEF", "#C4622D", "#6B7CE8", "#29D67A"];
+export const ACCENTS = ["#D4AF6A", "#8B6A4F", "#5B8DEF", "#C4622D", "#6B7CE8", "#29D67A"];
 
 export function generateProducts(storeId: string, businessType: BusinessType): Product[] {
   const names = SAMPLES[businessType] ?? FALLBACK;
@@ -52,4 +52,33 @@ export function generateProducts(storeId: string, businessType: BusinessType): P
       accent: ACCENTS[i % ACCENTS.length],
     };
   });
+}
+
+export function createProduct(partial: Omit<Product, "id" | "currency">): Product {
+  return { id: `prod-${Date.now()}`, currency: "USD", ...partial };
+}
+
+const PRODUCTS_PREFIX = "basalt_products_";
+
+/** Reads a store's saved product catalog, seeding (and persisting) one on first access. */
+export function getStoreProducts(store: Store): Product[] {
+  if (typeof window === "undefined") return generateProducts(store.id, store.businessType);
+
+  const raw = window.sessionStorage.getItem(`${PRODUCTS_PREFIX}${store.slug}`);
+  if (raw) {
+    try {
+      return JSON.parse(raw) as Product[];
+    } catch {
+      // fall through and reseed
+    }
+  }
+
+  const seeded = generateProducts(store.id, store.businessType);
+  window.sessionStorage.setItem(`${PRODUCTS_PREFIX}${store.slug}`, JSON.stringify(seeded));
+  return seeded;
+}
+
+export function saveStoreProducts(slug: string, products: Product[]): void {
+  if (typeof window === "undefined") return;
+  window.sessionStorage.setItem(`${PRODUCTS_PREFIX}${slug}`, JSON.stringify(products));
 }

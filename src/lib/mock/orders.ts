@@ -1,4 +1,4 @@
-import type { BusinessType } from "@/lib/mock/stores";
+import type { BusinessType, Store } from "@/lib/mock/stores";
 
 export type OrderStatus = "fulfilled" | "pending" | "refunded";
 
@@ -57,4 +57,29 @@ export function generateOrders(storeId: string, _businessType: BusinessType): Or
       status: STATUSES[i % STATUSES.length],
     };
   });
+}
+
+const ORDERS_PREFIX = "basalt_orders_";
+
+/** Reads a store's saved orders, seeding (and persisting) them on first access. */
+export function getStoreOrders(store: Store): Order[] {
+  if (typeof window === "undefined") return store.monthlyRevenue > 0 ? generateOrders(store.id, store.businessType) : [];
+
+  const raw = window.sessionStorage.getItem(`${ORDERS_PREFIX}${store.slug}`);
+  if (raw) {
+    try {
+      return JSON.parse(raw) as Order[];
+    } catch {
+      // fall through and reseed
+    }
+  }
+
+  const seeded = store.monthlyRevenue > 0 ? generateOrders(store.id, store.businessType) : [];
+  window.sessionStorage.setItem(`${ORDERS_PREFIX}${store.slug}`, JSON.stringify(seeded));
+  return seeded;
+}
+
+export function saveStoreOrders(slug: string, orders: Order[]): void {
+  if (typeof window === "undefined") return;
+  window.sessionStorage.setItem(`${ORDERS_PREFIX}${slug}`, JSON.stringify(orders));
 }

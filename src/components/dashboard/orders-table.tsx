@@ -1,46 +1,52 @@
+"use client";
+
+import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { Order, OrderStatus } from "@/lib/mock/orders";
-import { cn } from "@/lib/utils";
 
-const statusStyles: Record<OrderStatus, string> = {
-  fulfilled: "text-success bg-success-muted border-success/30",
-  pending: "text-warning bg-warning-muted border-warning/30",
-  refunded: "text-muted-foreground bg-muted border-border",
+const statusVariant: Record<OrderStatus, "secondary" | "outline" | "destructive"> = {
+  fulfilled: "secondary",
+  pending: "outline",
+  refunded: "destructive",
 };
+const statusLabel: Record<OrderStatus, string> = { fulfilled: "Fulfilled", pending: "Pending", refunded: "Refunded" };
 
-const statusLabels: Record<OrderStatus, string> = {
-  fulfilled: "Fulfilled",
-  pending: "Pending",
-  refunded: "Refunded",
-};
-
-export function OrdersTable({ orders }: { orders: Order[] }) {
+export function OrdersTable({ orders, onSelect }: { orders: Order[]; onSelect: (order: Order) => void }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-border">
-      <div className="flex flex-col divide-y divide-border">
-        {orders.map((order) => (
-          <div key={order.id} className="flex flex-col gap-3 bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 items-center gap-3">
-              <span className={cn("shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium", statusStyles[order.status])}>
-                {statusLabels[order.status]}
-              </span>
-              <div className="min-w-0">
-                <p className="truncate text-sm">
-                  <span className="font-mono text-xs text-muted-foreground">{order.number}</span> {order.customer}
+      <Table>
+        <TableHeader>
+          <TableRow className="hover:bg-transparent">
+            <TableHead className="pl-4">Order</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead dir="ltr">Items</TableHead>
+            <TableHead dir="ltr">Total</TableHead>
+            <TableHead className="pr-4">Date</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {orders.map((order) => (
+            <TableRow key={order.id} className="cursor-pointer" onClick={() => onSelect(order)}>
+              <TableCell className="pl-4">
+                <p className="font-mono text-xs text-muted-foreground" dir="ltr">
+                  {order.number}
                 </p>
-                <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
-                  <span>
-                    {order.items} item{order.items === 1 ? "" : "s"}
-                  </span>
-                  <span dir="ltr">{order.date}</span>
-                </div>
-              </div>
-            </div>
-            <div className="shrink-0 ps-8 sm:ps-0">
-              <span className="font-mono text-sm">${order.total.toLocaleString()}</span>
-            </div>
-          </div>
-        ))}
-      </div>
+                <p className="font-medium">{order.customer}</p>
+              </TableCell>
+              <TableCell>
+                <Badge variant={statusVariant[order.status]}>{statusLabel[order.status]}</Badge>
+              </TableCell>
+              <TableCell dir="ltr">{order.items}</TableCell>
+              <TableCell className="font-mono text-xs" dir="ltr">
+                ${order.total}
+              </TableCell>
+              <TableCell className="pr-4 text-muted-foreground" dir="ltr">
+                {order.date}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }

@@ -63,6 +63,8 @@ export interface Dictionary {
     allStores: string;
     overview: string;
     orders: string;
+    products: string;
+    customers: string;
     aiWorkspace: string;
     builder: string;
     deployments: string;
@@ -341,6 +343,8 @@ const dictionaries: Record<Locale, Dictionary> = {
       allStores: "All stores",
       overview: "Overview",
       orders: "Orders",
+      products: "Products",
+      customers: "Customers",
       deployments: "Deployments",
       domains: "Domains",
       aiWorkspace: "AI Workspace",
@@ -829,6 +833,8 @@ const dictionaries: Record<Locale, Dictionary> = {
       allStores: "كل المتاجر",
       overview: "نظرة عامة",
       orders: "الطلبات",
+      products: "المنتجات",
+      customers: "العملاء",
       deployments: "عمليات النشر",
       domains: "النطاقات",
       aiWorkspace: "مساحة الذكاء الاصطناعي",

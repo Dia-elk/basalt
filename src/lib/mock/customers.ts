@@ -1,3 +1,5 @@
+import type { Store } from "@/lib/mock/stores";
+
 export interface Customer {
   id: string;
   name: string;
@@ -42,4 +44,40 @@ export function generateCustomers(storeId: string): Customer[] {
       location: c.location,
     };
   });
+}
+
+export function createCustomer(partial: Omit<Customer, "id" | "currency" | "orders" | "totalSpent" | "joined">): Customer {
+  return {
+    id: `cust-${Date.now()}`,
+    currency: "USD",
+    orders: 0,
+    totalSpent: 0,
+    joined: new Date().toISOString().slice(0, 10),
+    ...partial,
+  };
+}
+
+const CUSTOMERS_PREFIX = "basalt_customers_";
+
+/** Reads a store's saved customer list, seeding (and persisting) one on first access. */
+export function getStoreCustomers(store: Store): Customer[] {
+  if (typeof window === "undefined") return generateCustomers(store.id);
+
+  const raw = window.sessionStorage.getItem(`${CUSTOMERS_PREFIX}${store.slug}`);
+  if (raw) {
+    try {
+      return JSON.parse(raw) as Customer[];
+    } catch {
+      // fall through and reseed
+    }
+  }
+
+  const seeded = generateCustomers(store.id);
+  window.sessionStorage.setItem(`${CUSTOMERS_PREFIX}${store.slug}`, JSON.stringify(seeded));
+  return seeded;
+}
+
+export function saveStoreCustomers(slug: string, customers: Customer[]): void {
+  if (typeof window === "undefined") return;
+  window.sessionStorage.setItem(`${CUSTOMERS_PREFIX}${slug}`, JSON.stringify(customers));
 }

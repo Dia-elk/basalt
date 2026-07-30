@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowLeft, LayoutGrid, Rocket, Globe2, Bot, Users, Settings, ShoppingCart, Blocks } from "lucide-react";
+import { ArrowLeft, LayoutGrid, Rocket, Globe2, Bot, Users, Settings, ShoppingCart, Blocks, ShoppingBag, UserRound } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StoreLogo } from "@/components/shared/store-logo";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -40,6 +40,8 @@ function storeNavItems(slug: string, features: string[]) {
   const core = [
     { href: base, key: "overview" as StoreSidebarKey, icon: LayoutGrid, exact: true },
     { href: `${base}/orders`, key: "orders" as StoreSidebarKey, icon: ShoppingCart },
+    { href: `${base}/products`, key: "products" as StoreSidebarKey, icon: ShoppingBag },
+    { href: `${base}/customers`, key: "customers" as StoreSidebarKey, icon: UserRound },
   ];
   const enabledFeatures = featureOptions
     .filter((f) => features.includes(f.value))
@@ -113,7 +115,7 @@ export function StoreSidebarContent({ slug, onNavigate }: { slug: string; onNavi
         </Link>
         {store && (
           <div className="flex items-center gap-2.5">
-            <StoreLogo businessType={store.businessType} accent={store.accent} size="sm" />
+            <StoreLogo logoUrl={store.logoUrl} name={store.name} size="sm" />
             <div className="min-w-0">
               <p className="truncate text-sm font-medium">{store.name}</p>
               <p className="text-xs text-muted-foreground">{store.businessType}</p>
