@@ -65,7 +65,7 @@ export function HeroSection() {
           <GlitchText
             className="font-bold text-success"
             text={t.headingBold}
-            style={{ "--glitch-duration-a": "0.9s", "--glitch-duration-b": "1.15s" } as React.CSSProperties}
+            style={{ "--glitch-duration-a": "1.05s", "--glitch-duration-b": "1.3s" } as React.CSSProperties}
           />{" "}
           {t.headingRest}
         </motion.h1>
