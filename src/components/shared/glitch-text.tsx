@@ -14,9 +14,17 @@ import { cn } from "@/lib/utils";
  * word via `content: attr(data-text)`. Animation respects
  * `prefers-reduced-motion` (disabled → static clean word).
  */
-export function GlitchText({ text, className }: { text: string; className?: string }) {
+export function GlitchText({
+  text,
+  className,
+  style,
+}: {
+  text: string;
+  className?: string;
+  style?: React.CSSProperties;
+}) {
   return (
-    <span className={cn("glitch", className)} data-text={text}>
+    <span className={cn("glitch", className)} data-text={text} style={style}>
       {text}
     </span>
   );
