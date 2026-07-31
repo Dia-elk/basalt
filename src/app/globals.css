@@ -200,49 +200,51 @@
   .glitch::before {
     color: #29d67a;
     text-shadow: 0.5px 0 0 rgba(41, 214, 122, 0.7);
-    animation: glitch-slice-a 2s infinite steps(1);
+    animation: glitch-slice-a 1.1s infinite steps(1);
     z-index: -1;
   }
   /* Lighter-green counter ghost — different timing so the two never sync. */
   .glitch::after {
     color: #7ce8a4;
     text-shadow: -0.5px 0 0 rgba(124, 232, 164, 0.55);
-    animation: glitch-slice-b 2.6s infinite steps(1);
+    animation: glitch-slice-b 1.4s infinite steps(1);
     z-index: -2;
   }
 
   /* Activity is spread across the full cycle — each crack is a 2-step burst
      (shift → settle) so it stays smooth, but they recur throughout so the
-     word never goes still. Steps(1) keeps the jumps crisp like a TV glitch. */
+     word never goes still. Steps(1) keeps the jumps crisp like a TV glitch.
+     Short (~1-1.5s) periods so a repeat is always visible within a glance,
+     rather than reading as a single one-off flicker on page load. */
   @keyframes glitch-slice-a {
     0%   { transform: translate(0, 0); clip-path: inset(0 0 0 0); }
-    6%   { transform: translate(-1.5px, 0); clip-path: inset(10% 0 55% 0); }
+    6%   { transform: translate(-2px, 0); clip-path: inset(10% 0 55% 0); }
     12%  { transform: translate(0, 0); clip-path: inset(0 0 0 0); }
-    22%  { transform: translate(1.5px, 0.5px); clip-path: inset(50% 0 20% 0); }
+    22%  { transform: translate(2px, 1px); clip-path: inset(50% 0 20% 0); }
     28%  { transform: translate(0, 0); clip-path: inset(0 0 0 0); }
-    38%  { transform: translate(-1px, -0.5px); clip-path: inset(70% 0 8% 0); }
+    38%  { transform: translate(-1.5px, -1px); clip-path: inset(70% 0 8% 0); }
     44%  { transform: translate(0, 0); clip-path: inset(0 0 0 0); }
-    54%  { transform: translate(1px, 0); clip-path: inset(20% 0 60% 0); }
+    54%  { transform: translate(1.5px, 0); clip-path: inset(20% 0 60% 0); }
     60%  { transform: translate(0, 0); clip-path: inset(0 0 0 0); }
-    70%  { transform: translate(-1.5px, 0.5px); clip-path: inset(40% 0 30% 0); }
+    70%  { transform: translate(-2px, 1px); clip-path: inset(40% 0 30% 0); }
     76%  { transform: translate(0, 0); clip-path: inset(0 0 0 0); }
-    86%  { transform: translate(1px, -0.5px); clip-path: inset(65% 0 12% 0); }
+    86%  { transform: translate(1.5px, -1px); clip-path: inset(65% 0 12% 0); }
     92%  { transform: translate(0, 0); clip-path: inset(0 0 0 0); }
     100% { transform: translate(0, 0); clip-path: inset(0 0 0 0); }
   }
   @keyframes glitch-slice-b {
     0%   { transform: translate(0, 0); clip-path: inset(0 0 0 0); }
-    8%   { transform: translate(1px, -0.5px); clip-path: inset(20% 0 60% 0); }
+    8%   { transform: translate(1.5px, -1px); clip-path: inset(20% 0 60% 0); }
     14%  { transform: translate(0, 0); clip-path: inset(0 0 0 0); }
-    25%  { transform: translate(-1.5px, 0); clip-path: inset(60% 0 15% 0); }
+    25%  { transform: translate(-2px, 0); clip-path: inset(60% 0 15% 0); }
     31%  { transform: translate(0, 0); clip-path: inset(0 0 0 0); }
-    42%  { transform: translate(0.5px, 0.5px); clip-path: inset(35% 0 40% 0); }
+    42%  { transform: translate(1px, 1px); clip-path: inset(35% 0 40% 0); }
     48%  { transform: translate(0, 0); clip-path: inset(0 0 0 0); }
-    59%  { transform: translate(-1px, 0); clip-path: inset(75% 0 5% 0); }
+    59%  { transform: translate(-1.5px, 0); clip-path: inset(75% 0 5% 0); }
     65%  { transform: translate(0, 0); clip-path: inset(0 0 0 0); }
-    76%  { transform: translate(1.5px, -0.5px); clip-path: inset(25% 0 55% 0); }
+    76%  { transform: translate(2px, -1px); clip-path: inset(25% 0 55% 0); }
     82%  { transform: translate(0, 0); clip-path: inset(0 0 0 0); }
-    90%  { transform: translate(-0.5px, 0.5px); clip-path: inset(50% 0 25% 0); }
+    90%  { transform: translate(-1px, 1px); clip-path: inset(50% 0 25% 0); }
     96%  { transform: translate(0, 0); clip-path: inset(0 0 0 0); }
     100% { transform: translate(0, 0); clip-path: inset(0 0 0 0); }
   }

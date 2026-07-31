@@ -17,7 +17,7 @@ const links = [
   { href: "/pricing", key: "pricing" as const },
 ];
 
-export function SiteHeader() {
+export function SiteHeader({ transparent = false }: { transparent?: boolean }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const { dict } = useLocale();
@@ -32,8 +32,9 @@ export function SiteHeader() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 w-full border-b bg-background/60 backdrop-blur-xl transition-colors duration-300",
-        scrolled ? "border-border" : "border-transparent"
+        "sticky top-0 z-50 w-full border-b transition-colors duration-300",
+        !transparent && "bg-background/60 backdrop-blur-xl",
+        !transparent && scrolled ? "border-border" : "border-transparent"
       )}
     >
       <Container className="flex h-16 items-center justify-between">

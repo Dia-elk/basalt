@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, CheckCircle2, Loader2, Sparkles } from "lucide-react";
 import { Container } from "@/components/shared/container";
 import { Button } from "@/components/ui/button";
-import { GLSLHills } from "@/components/ui/glsl-hills";
 import { GlitchText } from "@/components/shared/glitch-text";
 import { Input } from "@/components/ui/input";
 
@@ -31,9 +30,7 @@ export function WaitlistHero() {
   }
 
   return (
-    <section className="relative overflow-hidden">
-      <GLSLHills className="pointer-events-none absolute inset-0" />
-
+    <section>
       <Container className="relative flex flex-col items-center pt-28 pb-20 sm:pt-36 sm:pb-28">
         {/* Eyebrow */}
         <motion.div
@@ -68,7 +65,7 @@ export function WaitlistHero() {
           className="mt-5 max-w-lg text-center text-sm text-muted-foreground text-balance sm:text-base"
         >
           A new experience is being crafted behind the scenes. Be the first to
-          know when it drops — and get exclusive early access.
+          know when it drops and get exclusive early access.
         </motion.p>
 
         {/* Email form */}

@@ -3,6 +3,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { WaitlistHero } from "@/components/marketing/waitlist-hero";
 import { WaitlistFeatures } from "@/components/marketing/waitlist-features";
 import { WaitlistSocial } from "@/components/marketing/waitlist-social";
+import { GLSLHills } from "@/components/ui/glsl-hills";
 
 export const metadata = {
   title: "Coming Soon | Basalt",
@@ -11,8 +12,9 @@ export const metadata = {
 
 export default function WaitlistPage() {
   return (
-    <div className="flex min-h-screen flex-1 flex-col">
-      <SiteHeader />
+    <div className="relative flex min-h-screen flex-1 flex-col">
+      <GLSLHills className="pointer-events-none fixed inset-0" />
+      <SiteHeader transparent />
       <main className="flex-1">
         <WaitlistHero />
         <WaitlistFeatures />
